@@ -56,7 +56,11 @@
   }
   .entry-title{
     font-family:var(--serif); font-weight:700; font-size:19px;
-    margin:0 0 4px; color:var(--cream); line-height:1.3;
+    margin:0 0 8px; color:var(--cream); line-height:1.3;
+  }
+  .entry-verses{
+    font-family:var(--sans); font-size:12px; font-weight:600;
+    color:var(--gold-soft); margin:0 0 5px; letter-spacing:0.3px;
   }
   .entry-sub{
     font-family:var(--serif); font-style:italic; font-size:13.5px;
@@ -67,40 +71,68 @@
     text-align:center; margin-top:50px;
     font-size:11px; color: rgba(247,241,228,0.35); line-height:1.6;
   }
+  .about{
+    margin-top:34px; padding-top:28px;
+    border-top:1px solid var(--line);
+    text-align:center;
+  }
+  .about-name{
+    font-family:var(--sans); font-size:11px; font-weight:700;
+    letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);
+    margin:0 0 10px;
+  }
+  .about-photo{
+    display:block; width:84px; height:84px; border-radius:50%;
+    object-fit:cover; margin:0 auto 16px;
+    border:2px solid var(--gold-soft);
+  }
+  .about-line{
+    font-family:var(--serif); font-style:italic; font-size:13.5px;
+    line-height:1.6; color:var(--cream-dim); margin:0;
+    max-width:420px; margin-left:auto; margin-right:auto;
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <p class="eyebrow">Our devotionals</p>
+    <p class="eyebrow">Daily Devotionals</p>
     <h1>Growing in Faith</h1>
     <p class="subtitle">Walking together, one devotional at a time.</p>
-
     <div class="list">
+      <!--
+        NEWEST ENTRY GOES FIRST. When adding a new devotional, paste its
+        block right here, above the current top entry, so it stays first.
+      -->
       <a class="entry" href="devotionals/09-01-2026.html">
         <span class="arrow">&#8594;</span>
-        <p class="entry-date">September 01 2026</p>
+        <p class="entry-date">September 1</p>
         <p class="entry-title">A Season Ends, A Season Begins</p>
-        <p class="entry-sub">Ecclesiastes 3:1-8 &amp; 2 Corinthians 5:16-21: Summer's packing up. So is something in you.</p>
+        <p class="entry-verses">Ecclesiastes 3:1&ndash;8 &amp; 2 Corinthians 5:16&ndash;21</p>
+        <p class="entry-sub">Summer's packing up. So is something in you.</p>
       </a>
-
-    <div class="list">
-      <a class="entry" href="devotionals/08-31-2026.html">
+      <a class="entry" href="devotionals/trusting-when-you-cannot-see.html">
         <span class="arrow">&#8594;</span>
-        <p class="entry-date">August 31 2026</p>
+        <p class="entry-date">August 31</p>
         <p class="entry-title">Trusting When You Cannot See</p>
-        <p class="entry-sub">Job 42:1&ndash;6 &amp; John 14:1&ndash;6 &mdash; When understanding runs out, trust can begin to deepen.</p>
+        <p class="entry-verses">Job 42:1&ndash;6 &amp; John 14:1&ndash;6</p>
+        <p class="entry-sub">When understanding runs out, trust can begin to deepen.</p>
       </a>
-
       <!--
-        NEW DEVOTIONAL? Copy the block above and edit it:
+        NEW DEVOTIONAL? Copy a block above and edit it:
         1. href="devotionals/your-new-file.html"
         2. entry-date: the date or label
         3. entry-title: the devotional's title
-        4. entry-sub: one-line summary
+        4. entry-verses: the two scripture references
+        5. entry-sub: one-line summary
+        Remember: paste it at the TOP of the list, not the bottom.
       -->
     </div>
-
-    <p class="footer">New devotionals are added here as they're written.</p>
+    <p class="footer">New devotionals are added daily.</p>
+    <div class="about">
+      <img class="about-photo" src="assets/taylor-headshot.png" alt="Taylor Chelsted" />
+      <p class="about-name">Taylor Chelsted</p>
+      <p class="about-line">I write these devotionals as a way to grow in my own faith alongside other Christians walking the same journey. They're meant to be shared with family, friends, small groups, fellow believers, and anyone who could use a moment of daily reflection and encouragement.</p>
+    </div>
   </div>
 </body>
 </html>
