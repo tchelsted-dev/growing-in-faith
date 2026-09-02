@@ -202,37 +202,48 @@
   }
   .photo-content{
     position:relative; height:100%; box-sizing:border-box;
-    display:flex; flex-direction:column; justify-content:flex-end;
-    padding: 28px 26px 24px; z-index:1;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding: 26px 24px 22px; z-index:1;
   }
-  .photo-rule{ width:28px; height:2px; background:var(--cream); flex-shrink:0; }
-  .share-block{ display:flex; flex-direction:column; gap:16px; }
+  .share-top{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    flex-shrink:0;
+  }
+  .share-top-rule{ width:24px; height:2px; background:var(--gold); opacity:0.7; }
+  .share-hero{
+    flex:1; width:100%; display:flex; align-items:center; justify-content:center;
+    padding: 14px 0;
+  }
   .share-tagline{
     font-family:var(--serif); font-style:italic; font-weight:700;
     font-size: clamp(23px, 7.2vw, 29px); line-height:1.32; letter-spacing:-0.2px;
     color:var(--cream); margin:0; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
   }
+  .share-bottom{
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    width:100%; flex-shrink:0;
+  }
   .share-divider{
     width:32px; height:1px; background: var(--gold); opacity:0.65;
   }
-  .share-verses{ display:flex; flex-direction:column; gap:14px; }
+  .share-verses{ display:flex; flex-direction:column; align-items:center; gap:14px; }
   .share-verse{
     font-family:var(--serif); font-style:italic; font-weight:400;
-    font-size: clamp(14.5px, 4vw, 16px); line-height:1.5;
+    font-size: clamp(14.5px, 4vw, 16px); line-height:1.5; text-align:center;
     color: rgba(247,241,228,0.88); margin:0 0 4px;
     text-shadow: 0 1px 8px rgba(0,0,0,0.4);
   }
   .share-cite{
     font-family:var(--sans); font-size:10px; letter-spacing:1.2px;
-    color: rgba(247,241,228,0.65); text-transform:uppercase; margin:0;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+    color: var(--gold); text-transform:uppercase; margin:0; text-align:center;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
   }
   .share-byline{
     font-family:var(--sans); font-size:10.5px; letter-spacing:1.5px;
     color:var(--cream); text-transform:uppercase; margin:0; opacity:0.85;
     text-shadow: 0 1px 6px rgba(0,0,0,0.55);
   }
-  .share-actions{ display:flex; gap:10px; margin-top:18px; }
+  .share-actions{ display:flex; gap:10px; justify-content:center; margin-top:2px; }
   .share-btn{
     font-family:var(--sans); font-weight:700; font-size:12px;
     padding:9px 16px; border-radius:16px; cursor:pointer; border:none;
@@ -413,8 +424,14 @@ const scenes = [
       <div class="photo-bg" style="background-image:url('../assets/backgrounds/${SHARE_IMAGE}')"></div>
       <div class="photo-scrim"></div>
       <div class="photo-content">
-        <div class="share-block">
+        <div class="share-top">
+          <p class="share-byline">Growing in Faith &middot; ${SHARE_DATE}</p>
+          <div class="share-top-rule"></div>
+        </div>
+        <div class="share-hero">
           <p class="share-tagline">${SHARE_TAGLINE}</p>
+        </div>
+        <div class="share-bottom">
           <div class="share-divider"></div>
           <div class="share-verses">
             ${SHARE_VERSES.map(v => `
@@ -423,7 +440,6 @@ const scenes = [
               <p class="share-cite">${v.cite}</p>
             </div>`).join('')}
           </div>
-          <p class="share-byline">Growing in Faith &middot; ${SHARE_DATE}</p>
           <div class="share-actions">
             <button class="share-btn" id="shareImageBtn">Share image</button>
           </div>
