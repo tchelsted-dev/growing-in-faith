@@ -239,8 +239,8 @@
     text-shadow: 0 1px 6px rgba(0,0,0,0.6);
   }
   .share-byline{
-    font-family:var(--sans); font-size:10.5px; letter-spacing:1.5px;
-    color:var(--cream); text-transform:uppercase; margin:0; opacity:0.85;
+    font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:1.5px;
+    color:var(--cream); text-transform:uppercase; margin:0;
     text-shadow: 0 1px 6px rgba(0,0,0,0.55);
   }
   .share-actions{ display:flex; gap:10px; justify-content:center; margin-top:2px; }
@@ -511,7 +511,7 @@ function render(){
           const file = new File([blob], fileName, { type:'image/png' });
           if(navigator.canShare && navigator.canShare({ files:[file] })){
             try{
-              await navigator.share({ files:[file], title:'Growing in Faith', text:SHARE_TAGLINE });
+              await navigator.share({ files:[file] });
             }catch(shareErr){
               // user backed out of the share sheet, nothing to do
             }
