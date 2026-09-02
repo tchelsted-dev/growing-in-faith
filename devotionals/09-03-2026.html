@@ -332,7 +332,10 @@ function pickBackground(seed){
   return BACKGROUND_IMAGES[hash % BACKGROUND_IMAGES.length];
 }
 const SHARE_DATE = "September 3";
-const SHARE_IMAGE = pickBackground(SHARE_DATE);
+// Overridden from the automatic rotation: sunlight fits the "quiet,
+// steady practice" feel of a Discipline devotional better than whatever
+// the date hash happened to land on.
+const SHARE_IMAGE = "sunlight quote.jpg";
 const SHARE_TAGLINE = "Discipline isn't a decision you make in the moment. It's one you already made.";
 // Reuses the same two short excerpts already quoted in the body sections
 // above (one per passage, under 15 words each) — no new quoted material,
