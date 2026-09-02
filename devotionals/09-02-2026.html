@@ -198,11 +198,11 @@
   }
   .photo-scrim{
     position:absolute; inset:0;
-    background: linear-gradient(180deg, rgba(19,31,43,0.15) 0%, rgba(19,31,43,0.78) 100%);
+    background: linear-gradient(180deg, rgba(19,31,43,0.25) 0%, rgba(19,31,43,0.55) 45%, rgba(19,31,43,0.88) 100%);
   }
   .photo-content{
     position:relative; height:100%; box-sizing:border-box;
-    display:flex; flex-direction:column; justify-content:space-between;
+    display:flex; flex-direction:column; justify-content:flex-end;
     padding: 28px 26px 24px; z-index:1;
   }
   .photo-rule{ width:28px; height:2px; background:var(--cream); flex-shrink:0; }
@@ -224,11 +224,13 @@
   }
   .share-cite{
     font-family:var(--sans); font-size:10px; letter-spacing:1.2px;
-    color:var(--gold); text-transform:uppercase; margin:0;
+    color: rgba(247,241,228,0.65); text-transform:uppercase; margin:0;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.55);
   }
   .share-byline{
     font-family:var(--sans); font-size:10.5px; letter-spacing:1.5px;
     color:var(--cream); text-transform:uppercase; margin:0; opacity:0.85;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.55);
   }
   .share-actions{ display:flex; gap:10px; margin-top:18px; }
   .share-btn{
@@ -300,7 +302,9 @@ function pickBackground(seed){
   return BACKGROUND_IMAGES[hash % BACKGROUND_IMAGES.length];
 }
 const SHARE_DATE = "September 2";
-const SHARE_IMAGE = pickBackground("09-02-2026");
+// Overridden from the automatic rotation: wheat field fits the
+// sowing/harvest theme of this devotional directly.
+const SHARE_IMAGE = "golden wheat field quote.jpg";
 const SHARE_TAGLINE = "Nothing about this season is wasted. Not even the waiting.";
 // Reuses the same two short excerpts already quoted in the body sections
 // above (one per passage, under 15 words each) — no new quoted material,
@@ -409,7 +413,6 @@ const scenes = [
       <div class="photo-bg" style="background-image:url('../assets/backgrounds/${SHARE_IMAGE}')"></div>
       <div class="photo-scrim"></div>
       <div class="photo-content">
-        <div class="photo-rule"></div>
         <div class="share-block">
           <p class="share-tagline">${SHARE_TAGLINE}</p>
           <div class="share-divider"></div>
@@ -480,11 +483,13 @@ function render(){
     shareBtn.dataset.bound = 'true';
     shareBtn.onclick = async () => {
       const original = shareBtn.textContent;
-      shareBtn.textContent = 'Preparing\u2026';
+      const actionsRow = shareBtn.closest('.share-actions');
       shareBtn.disabled = true;
       try{
         const target = document.querySelector('.scene.photo');
+        if(actionsRow) actionsRow.style.visibility = 'hidden';
         const canvas = await html2canvas(target, { useCORS:true, backgroundColor:null, scale:2 });
+        if(actionsRow) actionsRow.style.visibility = '';
         canvas.toBlob(async (blob) => {
           const fileName = `growing-in-faith-${SHARE_DATE.toLowerCase().replace(/\s+/g,'-')}.png`;
           const file = new File([blob], fileName, { type:'image/png' });
@@ -506,6 +511,7 @@ function render(){
           shareBtn.disabled = false;
         }, 'image/png');
       }catch(err){
+        if(actionsRow) actionsRow.style.visibility = '';
         shareBtn.textContent = 'Try again';
         setTimeout(() => { shareBtn.textContent = original; shareBtn.disabled = false; }, 1500);
       }
