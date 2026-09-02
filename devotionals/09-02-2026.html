@@ -115,6 +115,10 @@
     letter-spacing:0.3px;
   }
 
+  /* Updated insight styling: was a muted top-bordered line that people
+     skipped past. Now a set-apart callout: tinted background, left
+     accent border, brighter text for real contrast against the navy
+     background, without outweighing the scripture blockquote above it. */
   p.insight{
     font-family:var(--serif); font-style:italic; font-size:15.5px;
     line-height:1.65; color: var(--cream); margin:14px 0 0;
@@ -130,6 +134,7 @@
     border:1px solid var(--line);
   }
   .badge.job{ background: rgba(200,155,74,0.10); }
+  .badge.thomas{ background: rgba(247,241,228,0.05); }
   .badge.jesus{ background: rgba(124,146,132,0.16); }
   .badge-name{
     font-family:var(--sans); font-weight:700; font-size:12.5px;
@@ -184,6 +189,54 @@
     line-height:1.5; margin-top:22px;
   }
 
+  /* Shareable photo-backed quote scene. Sits full-bleed behind the
+     progress dots and nav chrome, which stay in their normal place. */
+  .scene.photo{ padding:0; }
+  .photo-bg{
+    position:absolute; inset:0; background-size:cover;
+    background-position:center;
+  }
+  .photo-scrim{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(19,31,43,0.15) 0%, rgba(19,31,43,0.78) 100%);
+  }
+  .photo-content{
+    position:relative; height:100%; box-sizing:border-box;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding: 28px 26px 24px; z-index:1;
+  }
+  .photo-rule{ width:28px; height:2px; background:var(--cream); flex-shrink:0; }
+  .share-block{ display:flex; flex-direction:column; gap:16px; }
+  .share-tagline{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size: clamp(23px, 7.2vw, 29px); line-height:1.32; letter-spacing:-0.2px;
+    color:var(--cream); margin:0; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  .share-divider{
+    width:32px; height:1px; background: var(--gold); opacity:0.65;
+  }
+  .share-verses{ display:flex; flex-direction:column; gap:14px; }
+  .share-verse{
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size: clamp(14.5px, 4vw, 16px); line-height:1.5;
+    color: rgba(247,241,228,0.88); margin:0 0 4px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+  }
+  .share-cite{
+    font-family:var(--sans); font-size:10px; letter-spacing:1.2px;
+    color:var(--gold); text-transform:uppercase; margin:0;
+  }
+  .share-byline{
+    font-family:var(--sans); font-size:10.5px; letter-spacing:1.5px;
+    color:var(--cream); text-transform:uppercase; margin:0; opacity:0.85;
+  }
+  .share-actions{ display:flex; gap:10px; margin-top:18px; }
+  .share-btn{
+    font-family:var(--sans); font-weight:700; font-size:12px;
+    padding:9px 16px; border-radius:16px; cursor:pointer; border:none;
+    background: var(--gold); color: var(--navy-deep);
+  }
+
   #nav{
     flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
     padding: 10px 24px calc(14px + env(safe-area-inset-bottom));
@@ -229,6 +282,33 @@
 const PSA_LINK = "https://www.bible.com/bible/116/PSA.126.1-6.NLT";
 const JAS_LINK = "https://www.bible.com/bible/116/JAS.5.7-11.NLT";
 
+// Shareable-quote background photos. Filenames must match exactly what's
+// uploaded in assets/backgrounds/ (spaces are fine, they're quoted below).
+// Add new filenames here as the set grows.
+const BACKGROUND_IMAGES = [
+  "golden wheat field quote.jpg",
+  "misty mountain quote.jpg",
+  "ocean sunset quote.jpg",
+  "sunlight quote.jpg"
+];
+// Picks the same photo for the same date every time (not random per
+// pageview), so a given devotional always shares with the same look.
+function pickBackground(seed){
+  let hash = 0;
+  for(let i=0;i<seed.length;i++){ hash = (hash*31 + seed.charCodeAt(i)) >>> 0; }
+  return BACKGROUND_IMAGES[hash % BACKGROUND_IMAGES.length];
+}
+const SHARE_DATE = "September 2";
+const SHARE_IMAGE = pickBackground("09-02-2026");
+const SHARE_TAGLINE = "Nothing about this season is wasted. Not even the waiting.";
+// Reuses the same two short excerpts already quoted in the body sections
+// above (one per passage, under 15 words each) — no new quoted material,
+// just the same cleared quotes surfaced for sharing.
+const SHARE_VERSES = [
+  { quote: "Those who plant in tears will harvest with shouts of joy.", cite: "Psalm 126:5, NLT" },
+  { quote: "They eagerly look for the valuable harvest to ripen.", cite: "James 5:7, NLT" }
+];
+
 const scenes = [
   {
     key:"intro",
@@ -253,7 +333,7 @@ const scenes = [
       <div class="inner">
         <p class="eyebrow">1 of 2 &middot; Psalmist</p>
         <a class="ref-link" href="${PSA_LINK}" target="_blank" rel="noopener">Psalm 126:1&ndash;6 &#8599;</a>
-        <p class="body-text">Nobody knows who wrote this psalm. It came from someone in the crowd of exiles returning to Jerusalem, and whoever they were, they had clearly done the hard work of sowing before, in tears, without knowing yet what the harvest would look like.</p>
+        <p class="body-text">Nobody knows who wrote this psalm. It came from someone in the crowd of exiles returning to Jerusalem, and whoever they were, they'd clearly done the hard work of sowing before, in tears, without knowing yet what the harvest would look like.</p>
         <blockquote>&ldquo;Those who plant in tears will harvest with shouts of joy.&rdquo;</blockquote>
         <p class="cite">Psalm 126:5, NLT</p>
         <p class="insight">You don't skip the sowing because it's hard. The tears aren't proof something's going wrong. They might just be part of how this particular crop gets planted.</p>
@@ -283,7 +363,7 @@ const scenes = [
           </div>
           <div class="badge jesus">
             <p class="badge-name">JAMES</p>
-            <p class="badge-body">The farmer doesn't rush the harvest. Neither should you.</p>
+            <p class="badge-body">The farmer doesn't rush the harvest.</p>
           </div>
         </div>
       </div>`
@@ -321,6 +401,31 @@ const scenes = [
         <p class="footnote">Scripture readings: Psalm 126:1&ndash;6 and James 5:7&ndash;11.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
       </div>`
   },
+  {
+    key:"share",
+    photo:true,
+    render: () => `
+      <div class="photo-bg" style="background-image:url('../assets/backgrounds/${SHARE_IMAGE}')"></div>
+      <div class="photo-scrim"></div>
+      <div class="photo-content">
+        <div class="photo-rule"></div>
+        <div class="share-block">
+          <p class="share-tagline">${SHARE_TAGLINE}</p>
+          <div class="share-divider"></div>
+          <div class="share-verses">
+            ${SHARE_VERSES.map(v => `
+            <div>
+              <p class="share-verse">&ldquo;${v.quote}&rdquo;</p>
+              <p class="share-cite">${v.cite}</p>
+            </div>`).join('')}
+          </div>
+          <p class="share-byline">Growing in Faith &middot; ${SHARE_DATE}</p>
+          <div class="share-actions">
+            <button class="share-btn" id="copyQuoteBtn">Copy verses</button>
+          </div>
+        </div>
+      </div>`
+  },
 ];
 
 let current = 0;
@@ -333,7 +438,7 @@ const navLabel = document.getElementById('navLabel');
 function buildDom(){
   scenes.forEach((s, i) => {
     const div = document.createElement('div');
-    div.className = 'scene';
+    div.className = s.photo ? 'scene photo' : 'scene';
     div.dataset.index = i;
     div.innerHTML = s.render();
     viewport.appendChild(div);
@@ -367,6 +472,17 @@ function render(){
   const restartBtn = document.getElementById('restartBtn');
   if(restartBtn){
     restartBtn.onclick = () => { current = 0; render(); };
+  }
+
+  const copyBtn = document.getElementById('copyQuoteBtn');
+  if(copyBtn){
+    copyBtn.onclick = () => {
+      const verseText = SHARE_VERSES.map(v => `"${v.quote}" \u2014 ${v.cite}`).join('\n\n');
+      const text = `${SHARE_TAGLINE}\n\n${verseText}\n\nGrowing in Faith, ${SHARE_DATE}`;
+      navigator.clipboard.writeText(text);
+      copyBtn.textContent = 'Copied';
+      setTimeout(() => { copyBtn.textContent = 'Copy verses'; }, 1500);
+    };
   }
 }
 
