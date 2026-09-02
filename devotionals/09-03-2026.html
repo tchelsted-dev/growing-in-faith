@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>Discipline: What You Do When No One's Watching — September 3</title>
+<style>
+  :root{
+    --navy-deep:#131F2B;
+    --navy:#1F3245;
+    --navy-soft:#2C4258;
+    --gold:#C89B4A;
+    --gold-soft:#8E7440;
+    --cream:#F7F1E4;
+    --cream-dim:#C9C0AC;
+    --sage:#7C9284;
+    --sage-deep:#5C7160;
+    --line: rgba(200,155,74,0.28);
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+    --sans: 'Avenir Next', 'Century Gothic', 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%; overflow:hidden;
+    background: radial-gradient(120% 140% at 50% -10%, var(--navy-soft) 0%, var(--navy) 42%, var(--navy-deep) 100%);
+    font-family:var(--sans); color:var(--cream);
+  }
+  #app{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column;
+    height:100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #progress{
+    display:flex; gap:6px; justify-content:center;
+    padding: 18px 24px 8px;
+    flex-shrink:0;
+  }
+  .dot{
+    height:4px; flex:1; max-width:34px; border-radius:2px;
+    background: rgba(247,241,228,0.16);
+    position:relative; overflow:hidden;
+    transition: background 0.35s ease;
+  }
+  .dot.visited{ background: var(--gold-soft); }
+  .dot.current{ background: var(--gold); }
+
+  #viewport{
+    flex:1; position:relative; overflow:hidden;
+  }
+  .scene{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center;
+    padding: 8px 32px 24px;
+    opacity:0; transform: translateX(24px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events:none;
+    overflow-y:auto;
+  }
+  .scene.active{
+    opacity:1; transform: translateX(0);
+    pointer-events:auto;
+  }
+  .scene.leaving-back{ transform: translateX(-24px); }
+
+  .inner{ max-width: 480px; margin: 0 auto; width:100%; }
+
+  .eyebrow{
+    font-family:var(--sans); font-size:11px; letter-spacing:2px;
+    color: var(--gold); text-transform:uppercase; margin: 0 0 10px;
+    font-weight:600;
+  }
+  h1.hero{
+    font-family:var(--serif); font-weight:700; font-style:normal;
+    font-size: clamp(26px, 7.5vw, 38px); line-height:1.18; color:var(--cream);
+    margin: 0 0 12px; text-align:center;
+  }
+  .tagline{
+    font-family:var(--serif); font-style:italic; font-size:16px;
+    color: var(--cream-dim); line-height:1.5; margin: 0 0 22px;
+  }
+  .voices{
+    display:flex; flex-direction:column; gap:9px; margin-top:6px;
+  }
+  .voice-line{ font-size:14.5px; line-height:1.5; color:var(--cream-dim); }
+  .voice-line b{ color:var(--gold); font-weight:700; letter-spacing:0.5px; }
+
+  .tap-hint{
+    margin-top:34px; font-size:12.5px; color: rgba(247,241,228,0.45);
+    display:flex; align-items:center; gap:6px;
+  }
+  .tap-hint svg{ animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge{ 0%,100%{transform:translateX(0);} 50%{transform:translateX(5px);} }
+
+  .ref-link{
+    display:inline-block; font-family:var(--sans); font-weight:700;
+    font-size:15px; color:var(--gold); text-decoration:none;
+    border-bottom: 1px solid var(--gold); padding-bottom:2px; margin-bottom:16px;
+  }
+  .ref-link:active{ opacity:0.7; }
+
+  p.body-text{
+    font-family:var(--serif); font-size:16px; line-height:1.6;
+    color: var(--cream); margin: 0 0 18px;
+  }
+  blockquote{
+    margin: 0 0 6px; padding-left:16px; border-left: 2px solid var(--gold);
+    font-family:var(--serif); font-style:italic; font-size:18px;
+    line-height:1.5; color:var(--cream);
+  }
+  .cite{
+    font-size:12px; color:var(--gold-soft); margin: 0 0 16px 18px;
+    letter-spacing:0.3px;
+  }
+
+  /* Updated insight styling: was a muted top-bordered line that people
+     skipped past. Now a set-apart callout: tinted background, left
+     accent border, brighter text for real contrast against the navy
+     background, without outweighing the scripture blockquote above it. */
+  p.insight{
+    font-family:var(--serif); font-style:italic; font-size:15.5px;
+    line-height:1.65; color: var(--cream); margin:14px 0 0;
+    background: rgba(124,146,132,0.16);
+    border-left: 3px solid var(--sage);
+    border-radius: 0 8px 8px 0;
+    padding: 13px 16px;
+  }
+
+  /* Reveal / "Learn More About the Connection" toggle. Reuses the
+     existing gold ref-link language for the trigger and body-text
+     styling for the revealed content, so it matches the rest of the
+     format instead of introducing a new visual system. */
+  .reveal-toggle{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:var(--sans); font-weight:700; font-size:14.5px;
+    color:var(--gold); background:none; border:none; padding:0;
+    margin: 4px 0 20px; cursor:pointer; letter-spacing:0.3px;
+  }
+  .reveal-toggle svg{ transition: transform 0.3s ease; flex-shrink:0; }
+  .reveal-toggle.open svg{ transform: rotate(180deg); }
+  .reveal-panel{
+    max-height:0; overflow:hidden;
+    transition: max-height 0.45s ease;
+  }
+  .reveal-panel.open{ max-height:1400px; }
+  .reveal-panel .body-text:last-child{ margin-bottom:4px; }
+
+  .badge-stack{ display:flex; flex-direction:column; gap:12px; }
+  .badge{
+    border-radius:10px; padding:16px 18px;
+    border:1px solid var(--line);
+  }
+  .badge.job{ background: rgba(200,155,74,0.10); }
+  .badge.thomas{ background: rgba(247,241,228,0.05); }
+  .badge.jesus{ background: rgba(124,146,132,0.16); }
+  .badge-name{
+    font-family:var(--sans); font-weight:700; font-size:12.5px;
+    letter-spacing:1.5px; color:var(--gold); margin:0 0 5px;
+  }
+  .badge-body{
+    font-family:var(--serif); font-style:italic; font-size:15px;
+    color:var(--cream); margin:0; line-height:1.4;
+  }
+
+  .response-card{
+    background: linear-gradient(160deg, rgba(200,155,74,0.14), rgba(200,155,74,0.03));
+    border:1px solid var(--line); border-radius:12px;
+    padding: 26px 22px; text-align:center;
+  }
+  .response-card p{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size:19px; line-height:1.5; color:var(--cream); margin:0;
+  }
+
+  .qtext{
+    font-family:var(--serif); font-style:italic; font-size:19px;
+    line-height:1.55; color:var(--cream); margin:0;
+  }
+
+  .prayer-card{
+    background: rgba(124,146,132,0.14);
+    border:1px solid rgba(124,146,132,0.4); border-radius:12px;
+    padding: 22px 20px;
+  }
+  .prayer-card p{
+    font-family:var(--serif); font-style:italic; font-size:15.5px;
+    line-height:1.65; color:var(--cream); margin:0;
+  }
+
+  .closing-mark{
+    font-family:var(--serif); font-weight:700; font-style:italic;
+    font-size: clamp(22px, 6.5vw, 28px); line-height:1.4;
+    color:var(--cream); text-align:center; margin: 0 0 28px;
+  }
+  .share-row{
+    display:flex; flex-direction:column; gap:10px; align-items:center;
+  }
+  .btn{
+    font-family:var(--sans); font-weight:700; font-size:14px;
+    color:var(--navy-deep); background:var(--gold);
+    border:none; border-radius:24px; padding:13px 28px;
+    cursor:pointer; letter-spacing:0.3px;
+  }
+  .footnote{
+    font-size:10.5px; color: rgba(247,241,228,0.38); text-align:center;
+    line-height:1.5; margin-top:22px;
+  }
+
+  /* Shareable photo-backed quote scene. Sits full-bleed behind the
+     progress dots and nav chrome, which stay in their normal place. */
+  .scene.photo{ padding:0; }
+  .photo-bg{
+    position:absolute; inset:0; background-size:cover;
+    background-position:center;
+  }
+  .photo-scrim{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(19,31,43,0.25) 0%, rgba(19,31,43,0.55) 45%, rgba(19,31,43,0.88) 100%);
+  }
+  .photo-content{
+    position:relative; height:100%; box-sizing:border-box;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding: 26px 24px 22px; z-index:1;
+  }
+  .share-top{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    flex-shrink:0;
+  }
+  .share-top-rule{ width:24px; height:2px; background:var(--gold); opacity:0.7; }
+  .share-hero{
+    flex:1; width:100%; display:flex; align-items:center; justify-content:center;
+    padding: 14px 0;
+  }
+  .share-tagline{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size: clamp(23px, 7.2vw, 29px); line-height:1.32; letter-spacing:-0.2px;
+    color:var(--cream); margin:0; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  .share-bottom{
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    width:100%; flex-shrink:0;
+  }
+  .share-divider{
+    width:32px; height:1px; background: var(--gold); opacity:0.65;
+  }
+  .share-verses{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .share-verse{
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size: clamp(14.5px, 4vw, 16px); line-height:1.5; text-align:center;
+    color: rgba(247,241,228,0.88); margin:0 0 4px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+  }
+  .share-cite{
+    font-family:var(--sans); font-size:10px; letter-spacing:1.2px;
+    color: var(--gold); text-transform:uppercase; margin:0; text-align:center;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  }
+  .share-byline{
+    font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:1.5px;
+    color:var(--cream); text-transform:uppercase; margin:0;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+  }
+  .share-actions{ display:flex; gap:10px; justify-content:center; margin-top:2px; }
+  .share-btn{
+    font-family:var(--sans); font-weight:700; font-size:12px;
+    padding:9px 16px; border-radius:16px; cursor:pointer; border:none;
+    background: var(--gold); color: var(--navy-deep);
+  }
+
+  #nav{
+    flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 24px calc(14px + env(safe-area-inset-bottom));
+    gap:14px;
+  }
+  .navbtn{
+    font-family:var(--sans); font-size:13px; font-weight:700;
+    color: var(--cream); background: rgba(247,241,228,0.08);
+    border:1px solid rgba(247,241,228,0.14); border-radius:22px;
+    padding: 11px 20px; cursor:pointer; letter-spacing:0.3px;
+    display:flex; align-items:center; gap:6px;
+    transition: opacity 0.2s ease;
+  }
+  .navbtn[disabled]{ opacity:0.25; pointer-events:none; }
+  .navbtn.primary{ background: var(--gold); color: var(--navy-deep); border-color:transparent; }
+  .navlabel{
+    font-size:11px; color: rgba(247,241,228,0.4); letter-spacing:1px;
+    font-family:var(--sans);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scene, .tap-hint svg, .reveal-toggle svg { transition:none; animation:none; }
+  }
+
+  @media (min-width:640px){
+    .scene{ padding: 8px 60px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="progress"></div>
+  <div id="viewport"></div>
+  <div id="nav">
+    <button class="navbtn" id="backBtn">&#8592; Back</button>
+    <span class="navlabel" id="navLabel">1 / 9</span>
+    <button class="navbtn primary" id="nextBtn">Next &#8594;</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const DAN_LINK = "https://www.bible.com/bible/116/DAN.6.1-23.NLT";
+const ACT_LINK = "https://www.bible.com/bible/116/ACT.16.16-34.NLT";
+
+// Shareable-quote background photos. Filenames must match exactly what's
+// uploaded in assets/backgrounds/ (spaces are fine, they're quoted below).
+// Add new filenames here as the set grows.
+const BACKGROUND_IMAGES = [
+  "golden wheat field quote.jpg",
+  "misty mountain quote.jpg",
+  "ocean sunset quote.jpg",
+  "sunlight quote.jpg"
+];
+// Picks the same photo for the same date every time (not random per
+// pageview), so a given devotional always shares with the same look.
+function pickBackground(seed){
+  let hash = 0;
+  for(let i=0;i<seed.length;i++){ hash = (hash*31 + seed.charCodeAt(i)) >>> 0; }
+  return BACKGROUND_IMAGES[hash % BACKGROUND_IMAGES.length];
+}
+const SHARE_DATE = "September 3";
+const SHARE_IMAGE = pickBackground(SHARE_DATE);
+const SHARE_TAGLINE = "Discipline isn't a decision you make in the moment. It's one you already made.";
+// Reuses the same two short excerpts already quoted in the body sections
+// above (one per passage, under 15 words each) — no new quoted material,
+// just the same cleared quotes surfaced for sharing.
+const SHARE_VERSES = [
+  { quote: "He prayed three times a day, just as he had always done.", cite: "Daniel 6:10, NLT" },
+  { quote: "What must I do to be saved?", cite: "Acts 16:30, NLT" }
+];
+
+const scenes = [
+  {
+    key:"intro",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow" style="text-align:center;">September 3 &middot; Devotional</p>
+        <h1 class="hero">Discipline:<br/>What You Do<br/>When No One's<br/>Watching</h1>
+        <p class="tagline" style="text-align:center;">Two men who didn't wait for a crisis to decide what they already believed.</p>
+        <div class="voices">
+          <p class="voice-line"><b>DANIEL</b> &nbsp;I didn't change what I was already doing.</p>
+          <p class="voice-line"><b>PAUL &amp; SILAS</b> &nbsp;We kept singing before we knew how the night would end.</p>
+        </div>
+        <div class="tap-hint" style="justify-content:center;">
+          Swipe or tap Next to begin
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>`
+  },
+  {
+    key:"daniel",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">1 of 2 &middot; Daniel</p>
+        <a class="ref-link" href="${DAN_LINK}" target="_blank" rel="noopener">Daniel 6:1&ndash;23 &#8599;</a>
+        <p class="body-text">Daniel was one of the top three leaders in Persia, and the men under him hated that they couldn't find a single thing wrong with how he did his job. So they got the king to sign a law making it illegal to pray to anyone but the king for thirty days, knowing exactly what Daniel would do about it. When Daniel found out the decree was signed, he didn't change a single thing. He went home, knelt by the same open window facing Jerusalem, and prayed the same way he always had.</p>
+        <blockquote>&ldquo;He prayed three times a day, just as he had always done.&rdquo;</blockquote>
+        <p class="cite">Daniel 6:10, NLT</p>
+        <p class="insight">The plot didn't test what Daniel believed. It tested what he'd already built.</p>
+      </div>`
+  },
+  {
+    key:"paul_silas",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">2 of 2 &middot; Paul &amp; Silas</p>
+        <a class="ref-link" href="${ACT_LINK}" target="_blank" rel="noopener">Acts 16:16&ndash;34 &#8599;</a>
+        <p class="body-text">Paul and Silas were beaten and thrown into the deepest cell of a Roman prison after Paul freed an enslaved girl from something her owners had been profiting off of. Feet locked in stocks, in the dark, they didn't wait to see how the night would turn out. Around midnight they were praying and singing, loud enough for every other prisoner to hear. When an earthquake threw open the doors, they stayed instead of running, and the guard who was about to take his own life ended up asking the one question that mattered.</p>
+        <blockquote>&ldquo;What must I do to be saved?&rdquo;</blockquote>
+        <p class="cite">Acts 16:30, NLT</p>
+        <p class="insight">Their discipline didn't just get them through the night. It became the reason a stranger's whole life changed.</p>
+      </div>`
+  },
+  {
+    key:"learn_more",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Dig deeper</p>
+        <h1 class="hero" style="font-size:clamp(22px,6vw,28px); margin-bottom:16px;">Learn More About the Connection</h1>
+        <button class="reveal-toggle" id="revealToggle">
+          <span id="revealLabel">Tap to reveal</span>
+          <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="reveal-panel" id="revealPanel">
+          <p class="body-text">Daniel wasn't caught doing anything new. His enemies found no fault in his work, so they used a law that couldn't be undone, even by the king, to trap him in the one thing he'd never stop doing: praying, three times a day, like always. Darius fasted through the night, hoping Daniel would survive. In the morning, Daniel was found completely unharmed. God shut the lions' mouths, and the king who tried to save him ended up telling his whole empire to fear the God of Daniel.</p>
+          <p class="body-text">Paul and Silas were beaten and locked in the deepest part of a Roman prison for freeing a girl from something that had been profiting off her. At midnight, in the dark, they were praying and singing before the earthquake ever came. When the doors flew open, they stayed, and the jailer who was about to take his own life asked what he must do to be saved. That same night he and his household were baptized, the start of an entirely new life.</p>
+          <p class="body-text">Neither man performed his faith for the crisis. They just kept doing what they'd already been doing, and it became the thing someone else needed to see. That's what discipline is for. Disciple comes from the same root: someone who stays in practice, in the word and in prayer, long before it's tested.</p>
+        </div>
+      </div>`
+  },
+  {
+    key:"badges",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">The two voices</p>
+        <div class="badge-stack">
+          <div class="badge job">
+            <p class="badge-name">DANIEL</p>
+            <p class="badge-body">Didn't change what he was already doing.</p>
+          </div>
+          <div class="badge jesus">
+            <p class="badge-name">PAUL &amp; SILAS</p>
+            <p class="badge-body">Kept the practice going in the dark.</p>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    key:"response",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">My response</p>
+        <div class="response-card">
+          <p>&ldquo;Let me be the kind of person who doesn't wait for a crisis to decide what I already believe.&rdquo;</p>
+        </div>
+      </div>`
+  },
+  {
+    key:"question",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Question to sit with</p>
+        <p class="qtext">What's one discipline you've let slide that you could pick back up today?</p>
+      </div>`
+  },
+  {
+    key:"prayer_closing",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Prayer</p>
+        <div class="prayer-card">
+          <p>God, I don't want my faith to only show up when things get hard. Help me build the kind of habits that hold whether anyone's watching or not. Give me the discipline to keep showing up in the small, ordinary moments, so I'm not scrambling to find you the day I actually need you. Use my faithfulness, however small, to be something someone else needs to see. Amen.</p>
+        </div>
+        <p class="closing-mark" style="margin-top:26px;">Discipline isn't a decision you make in the moment.<br/>It's one you already made.</p>
+        <div class="share-row">
+          <button class="btn" id="restartBtn">Start again</button>
+        </div>
+        <p class="footnote">Scripture readings: Daniel 6:1&ndash;23 and Acts 16:16&ndash;34.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
+      </div>`
+  },
+  {
+    key:"share",
+    photo:true,
+    render: () => `
+      <div class="photo-bg" style="background-image:url('../assets/backgrounds/${SHARE_IMAGE}')"></div>
+      <div class="photo-scrim"></div>
+      <div class="photo-content">
+        <div class="share-top">
+          <p class="share-byline">Growing in Faith &middot; ${SHARE_DATE}</p>
+          <div class="share-top-rule"></div>
+        </div>
+        <div class="share-hero">
+          <p class="share-tagline">${SHARE_TAGLINE}</p>
+        </div>
+        <div class="share-bottom">
+          <div class="share-divider"></div>
+          <div class="share-verses">
+            ${SHARE_VERSES.map(v => `
+            <div>
+              <p class="share-verse">&ldquo;${v.quote}&rdquo;</p>
+              <p class="share-cite">${v.cite}</p>
+            </div>`).join('')}
+          </div>
+          <div class="share-actions">
+            <button class="share-btn" id="shareImageBtn">Share image</button>
+          </div>
+        </div>
+      </div>`
+  },
+];
+
+let current = 0;
+const viewport = document.getElementById('viewport');
+const progress = document.getElementById('progress');
+const backBtn = document.getElementById('backBtn');
+const nextBtn = document.getElementById('nextBtn');
+const navLabel = document.getElementById('navLabel');
+
+function buildDom(){
+  scenes.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = s.photo ? 'scene photo' : 'scene';
+    div.dataset.index = i;
+    div.innerHTML = s.render();
+    viewport.appendChild(div);
+  });
+  for(let i=0;i<scenes.length;i++){
+    const d = document.createElement('div');
+    d.className = 'dot';
+    progress.appendChild(d);
+  }
+}
+
+function setupRevealToggle(){
+  const btn = document.getElementById('revealToggle');
+  const panel = document.getElementById('revealPanel');
+  const label = document.getElementById('revealLabel');
+  if(!btn || !panel) return;
+  btn.addEventListener('click', () => {
+    const isOpen = panel.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    label.textContent = isOpen ? 'Tap to collapse' : 'Tap to reveal';
+  });
+}
+
+function render(){
+  const sceneEls = viewport.querySelectorAll('.scene');
+  sceneEls.forEach((el, i) => {
+    el.classList.remove('active','leaving-back');
+    if(i === current){
+      el.classList.add('active');
+    } else if (i < current) {
+      el.classList.add('leaving-back');
+    }
+  });
+  const dots = progress.querySelectorAll('.dot');
+  dots.forEach((d,i) => {
+    d.classList.toggle('current', i === current);
+    d.classList.toggle('visited', i < current);
+  });
+  backBtn.disabled = current === 0;
+  nextBtn.innerHTML = current === scenes.length - 1 ? 'Restart &#8635;' : 'Next &#8594;';
+  navLabel.textContent = `${current + 1} / ${scenes.length}`;
+
+  const restartBtn = document.getElementById('restartBtn');
+  if(restartBtn){
+    restartBtn.onclick = () => { current = 0; render(); };
+  }
+
+  const shareBtn = document.getElementById('shareImageBtn');
+  if(shareBtn && !shareBtn.dataset.bound){
+    shareBtn.dataset.bound = 'true';
+    shareBtn.onclick = async () => {
+      const original = shareBtn.textContent;
+      const actionsRow = shareBtn.closest('.share-actions');
+      shareBtn.disabled = true;
+      try{
+        const target = document.querySelector('.scene.photo');
+        if(actionsRow) actionsRow.style.visibility = 'hidden';
+        const canvas = await html2canvas(target, { useCORS:true, backgroundColor:null, scale:2 });
+        if(actionsRow) actionsRow.style.visibility = '';
+        canvas.toBlob(async (blob) => {
+          const fileName = `growing-in-faith-${SHARE_DATE.toLowerCase().replace(/\s+/g,'-')}.png`;
+          const file = new File([blob], fileName, { type:'image/png' });
+          if(navigator.canShare && navigator.canShare({ files:[file] })){
+            try{
+              await navigator.share({ files:[file] });
+            }catch(shareErr){
+              // user backed out of the share sheet, nothing to do
+            }
+          } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          shareBtn.textContent = original;
+          shareBtn.disabled = false;
+        }, 'image/png');
+      }catch(err){
+        if(actionsRow) actionsRow.style.visibility = '';
+        shareBtn.textContent = 'Try again';
+        setTimeout(() => { shareBtn.textContent = original; shareBtn.disabled = false; }, 1500);
+      }
+    };
+  }
+}
+
+function go(delta){
+  const target = current + delta;
+  if(target < 0) return;
+  if(target > scenes.length - 1){
+    current = 0; render(); return;
+  }
+  current = target;
+  render();
+}
+
+backBtn.addEventListener('click', () => go(-1));
+nextBtn.addEventListener('click', () => go(1));
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+});
+
+let touchStartX = null;
+viewport.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+}, {passive:true});
+viewport.addEventListener('touchend', (e) => {
+  if(touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx) > 45){
+    if(dx < 0) go(1); else go(-1);
+  }
+  touchStartX = null;
+}, {passive:true});
+
+buildDom();
+setupRevealToggle();
+render();
+</script>
+
+</body>
+</html>
