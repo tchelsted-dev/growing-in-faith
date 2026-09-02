@@ -278,6 +278,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 const PSA_LINK = "https://www.bible.com/bible/116/PSA.126.1-6.NLT";
 const JAS_LINK = "https://www.bible.com/bible/116/JAS.5.7-11.NLT";
@@ -421,7 +422,7 @@ const scenes = [
           </div>
           <p class="share-byline">Growing in Faith &middot; ${SHARE_DATE}</p>
           <div class="share-actions">
-            <button class="share-btn" id="copyQuoteBtn">Copy verses</button>
+            <button class="share-btn" id="shareImageBtn">Share image</button>
           </div>
         </div>
       </div>`
@@ -474,14 +475,40 @@ function render(){
     restartBtn.onclick = () => { current = 0; render(); };
   }
 
-  const copyBtn = document.getElementById('copyQuoteBtn');
-  if(copyBtn){
-    copyBtn.onclick = () => {
-      const verseText = SHARE_VERSES.map(v => `"${v.quote}" \u2014 ${v.cite}`).join('\n\n');
-      const text = `${SHARE_TAGLINE}\n\n${verseText}\n\nGrowing in Faith, ${SHARE_DATE}`;
-      navigator.clipboard.writeText(text);
-      copyBtn.textContent = 'Copied';
-      setTimeout(() => { copyBtn.textContent = 'Copy verses'; }, 1500);
+  const shareBtn = document.getElementById('shareImageBtn');
+  if(shareBtn && !shareBtn.dataset.bound){
+    shareBtn.dataset.bound = 'true';
+    shareBtn.onclick = async () => {
+      const original = shareBtn.textContent;
+      shareBtn.textContent = 'Preparing\u2026';
+      shareBtn.disabled = true;
+      try{
+        const target = document.querySelector('.scene.photo');
+        const canvas = await html2canvas(target, { useCORS:true, backgroundColor:null, scale:2 });
+        canvas.toBlob(async (blob) => {
+          const fileName = `growing-in-faith-${SHARE_DATE.toLowerCase().replace(/\s+/g,'-')}.png`;
+          const file = new File([blob], fileName, { type:'image/png' });
+          if(navigator.canShare && navigator.canShare({ files:[file] })){
+            try{
+              await navigator.share({ files:[file], title:'Growing in Faith', text:SHARE_TAGLINE });
+            }catch(shareErr){
+              // user backed out of the share sheet, nothing to do
+            }
+          } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          shareBtn.textContent = original;
+          shareBtn.disabled = false;
+        }, 'image/png');
+      }catch(err){
+        shareBtn.textContent = 'Try again';
+        setTimeout(() => { shareBtn.textContent = original; shareBtn.disabled = false; }, 1500);
+      }
     };
   }
 }
