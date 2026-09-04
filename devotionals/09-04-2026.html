@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>You Can Set It Down — September 4</title>
+<style>
+  :root{
+    --navy-deep:#131F2B;
+    --navy:#1F3245;
+    --navy-soft:#2C4258;
+    --gold:#C89B4A;
+    --gold-soft:#8E7440;
+    --cream:#F7F1E4;
+    --cream-dim:#C9C0AC;
+    --sage:#7C9284;
+    --sage-deep:#5C7160;
+    --line: rgba(200,155,74,0.28);
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+    --sans: 'Avenir Next', 'Century Gothic', 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%; overflow:hidden;
+    background: radial-gradient(120% 140% at 50% -10%, var(--navy-soft) 0%, var(--navy) 42%, var(--navy-deep) 100%);
+    font-family:var(--sans); color:var(--cream);
+  }
+  #app{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column;
+    height:100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #progress{
+    display:flex; gap:6px; justify-content:center;
+    padding: 18px 24px 8px;
+    flex-shrink:0;
+  }
+  .dot{
+    height:4px; flex:1; max-width:34px; border-radius:2px;
+    background: rgba(247,241,228,0.16);
+    position:relative; overflow:hidden;
+    transition: background 0.35s ease;
+  }
+  .dot.visited{ background: var(--gold-soft); }
+  .dot.current{ background: var(--gold); }
+
+  #viewport{
+    flex:1; position:relative; overflow:hidden;
+  }
+  .scene{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center;
+    padding: 8px 32px 24px;
+    opacity:0; transform: translateX(24px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events:none;
+    overflow-y:auto;
+  }
+  .scene.active{
+    opacity:1; transform: translateX(0);
+    pointer-events:auto;
+  }
+  .scene.leaving-back{ transform: translateX(-24px); }
+
+  .inner{ max-width: 480px; margin: 0 auto; width:100%; }
+
+  .eyebrow{
+    font-family:var(--sans); font-size:11px; letter-spacing:2px;
+    color: var(--gold); text-transform:uppercase; margin: 0 0 10px;
+    font-weight:600;
+  }
+  h1.hero{
+    font-family:var(--serif); font-weight:700; font-style:normal;
+    font-size: clamp(26px, 7.5vw, 38px); line-height:1.18; color:var(--cream);
+    margin: 0 0 12px;
+  }
+  .tagline{
+    font-family:var(--serif); font-style:italic; font-size:16px;
+    color: var(--cream-dim); line-height:1.5; margin: 0 0 22px;
+  }
+  .voices{
+    display:flex; flex-direction:column; gap:9px; margin-top:6px;
+  }
+  .voice-line{ font-size:14.5px; line-height:1.5; color:var(--cream-dim); }
+  .voice-line b{ color:var(--gold); font-weight:700; letter-spacing:0.5px; }
+
+  .tap-hint{
+    margin-top:34px; font-size:12.5px; color: rgba(247,241,228,0.45);
+    display:flex; align-items:center; gap:6px;
+  }
+  .tap-hint svg{ animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge{ 0%,100%{transform:translateX(0);} 50%{transform:translateX(5px);} }
+
+  .ref-link{
+    display:inline-block; font-family:var(--sans); font-weight:700;
+    font-size:15px; color:var(--gold); text-decoration:none;
+    border-bottom: 1px solid var(--gold); padding-bottom:2px; margin-bottom:16px;
+  }
+  .ref-link:active{ opacity:0.7; }
+
+  p.body-text{
+    font-family:var(--serif); font-size:16px; line-height:1.6;
+    color: var(--cream); margin: 0 0 18px;
+  }
+  blockquote{
+    margin: 0 0 6px; padding-left:16px; border-left: 2px solid var(--gold);
+    font-family:var(--serif); font-style:italic; font-size:18px;
+    line-height:1.5; color:var(--cream);
+  }
+  .cite{
+    font-size:12px; color:var(--gold-soft); margin: 0 0 16px 18px;
+    letter-spacing:0.3px;
+  }
+
+  p.insight{
+    font-family:var(--serif); font-style:italic; font-size:15.5px;
+    line-height:1.65; color: var(--cream); margin:14px 0 0;
+    background: rgba(124,146,132,0.16);
+    border-left: 3px solid var(--sage);
+    border-radius: 0 8px 8px 0;
+    padding: 13px 16px;
+  }
+
+  .badge-stack{ display:flex; flex-direction:column; gap:12px; }
+  .badge{
+    border-radius:10px; padding:16px 18px;
+    border:1px solid var(--line);
+  }
+  .badge.job{ background: rgba(200,155,74,0.10); }
+  .badge.thomas{ background: rgba(247,241,228,0.05); }
+  .badge.jesus{ background: rgba(124,146,132,0.16); }
+  .badge-name{
+    font-family:var(--sans); font-weight:700; font-size:12.5px;
+    letter-spacing:1.5px; color:var(--gold); margin:0 0 5px;
+  }
+  .badge-body{
+    font-family:var(--serif); font-style:italic; font-size:15px;
+    color:var(--cream); margin:0; line-height:1.4;
+  }
+
+  .response-card{
+    background: linear-gradient(160deg, rgba(200,155,74,0.14), rgba(200,155,74,0.03));
+    border:1px solid var(--line); border-radius:12px;
+    padding: 26px 22px; text-align:center;
+  }
+  .response-card p{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size:19px; line-height:1.5; color:var(--cream); margin:0;
+  }
+
+  .qtext{
+    font-family:var(--serif); font-style:italic; font-size:19px;
+    line-height:1.55; color:var(--cream); margin:0;
+  }
+
+  .prayer-card{
+    background: rgba(124,146,132,0.14);
+    border:1px solid rgba(124,146,132,0.4); border-radius:12px;
+    padding: 22px 20px;
+  }
+  .prayer-card p{
+    font-family:var(--serif); font-style:italic; font-size:15.5px;
+    line-height:1.65; color:var(--cream); margin:0;
+  }
+
+  .closing-mark{
+    font-family:var(--serif); font-weight:700; font-style:italic;
+    font-size: clamp(22px, 6.5vw, 28px); line-height:1.4;
+    color:var(--cream); text-align:center; margin: 0 0 28px;
+  }
+  .share-row{
+    display:flex; flex-direction:column; gap:10px; align-items:center;
+  }
+  .btn{
+    font-family:var(--sans); font-weight:700; font-size:14px;
+    color:var(--navy-deep); background:var(--gold);
+    border:none; border-radius:24px; padding:13px 28px;
+    cursor:pointer; letter-spacing:0.3px;
+  }
+  .footnote{
+    font-size:10.5px; color: rgba(247,241,228,0.38); text-align:center;
+    line-height:1.5; margin-top:22px;
+  }
+
+  #nav{
+    flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 24px calc(14px + env(safe-area-inset-bottom));
+    gap:14px;
+  }
+  .navbtn{
+    font-family:var(--sans); font-size:13px; font-weight:700;
+    color: var(--cream); background: rgba(247,241,228,0.08);
+    border:1px solid rgba(247,241,228,0.14); border-radius:22px;
+    padding: 11px 20px; cursor:pointer; letter-spacing:0.3px;
+    display:flex; align-items:center; gap:6px;
+    transition: opacity 0.2s ease;
+  }
+  .navbtn[disabled]{ opacity:0.25; pointer-events:none; }
+  .navbtn.primary{ background: var(--gold); color: var(--navy-deep); border-color:transparent; }
+  .navlabel{
+    font-size:11px; color: rgba(247,241,228,0.4); letter-spacing:1px;
+    font-family:var(--sans);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scene, .tap-hint svg { transition:none; animation:none; }
+  }
+
+  @media (min-width:640px){
+    .scene{ padding: 8px 60px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="progress"></div>
+  <div id="viewport"></div>
+  <div id="nav">
+    <button class="navbtn" id="backBtn">&#8592; Back</button>
+    <span class="navlabel" id="navLabel">1 / 6</span>
+    <button class="navbtn primary" id="nextBtn">Next &#8594;</button>
+  </div>
+</div>
+
+<script>
+const GEN_LINK = "https://www.bible.com/bible/116/GEN.2.1-3.NLT";
+const MAT_LINK = "https://www.bible.com/bible/116/MAT.11.28-30.NLT";
+
+const scenes = [
+  {
+    key:"intro",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">September 4 &middot; Devotional</p>
+        <h1 class="hero">You Can<br/>Set It Down</h1>
+        <p class="tagline">God built rest into the world before you ever did anything to deserve it.</p>
+        <div class="voices">
+          <p class="voice-line"><b>GOD</b> &nbsp;I finished. I blessed the pause itself, and I made it holy.</p>
+          <p class="voice-line"><b>JESUS</b> &nbsp;You don't need to be finished to come to me. Come as you are, tired.</p>
+        </div>
+        <div class="tap-hint">
+          Swipe or tap Next to begin
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>`
+  },
+  {
+    key:"god",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">1 of 2 &middot; God</p>
+        <a class="ref-link" href="${GEN_LINK}" target="_blank" rel="noopener">Genesis 2:1&ndash;3 &#8599;</a>
+        <p class="body-text">After six days of making everything from nothing, God stops. Not because he needed to, but because the stopping itself mattered enough to name and bless. He set it apart as holy before a single person had done anything to earn it.</p>
+        <blockquote>&ldquo;God blessed the seventh day and declared it holy.&rdquo;</blockquote>
+        <p class="cite">Genesis 2:3, NLT</p>
+        <p class="insight">Rest didn't need your permission to matter. God gave it worth before you were even in the picture.</p>
+      </div>`
+  },
+  {
+    key:"jesus",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">2 of 2 &middot; Jesus</p>
+        <a class="ref-link" href="${MAT_LINK}" target="_blank" rel="noopener">Matthew 11:28&ndash;30 &#8599;</a>
+        <p class="body-text">Centuries later, Jesus doesn't wait for people to earn a break before offering one. He says it straight to the people who are worn down and carrying too much, no qualifications required. What he's offering isn't a nap, it's relief from carrying things you were never meant to carry alone.</p>
+        <blockquote>&ldquo;Come to me, all of you who are weary and carry heavy burdens.&rdquo;</blockquote>
+        <p class="cite">Matthew 11:28, NLT</p>
+        <p class="insight">He didn't say come once you've got it together. He said come as you are, tired counts.</p>
+      </div>`
+  },
+  {
+    key:"reflection",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">My Reflection</p>
+        <div class="response-card">
+          <p>&ldquo;I don't have to prove I'm finished before I let myself stop.&rdquo;</p>
+        </div>
+      </div>`
+  },
+  {
+    key:"question",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Question to sit with</p>
+        <p class="qtext">What's one thing you could actually not do this weekend, on purpose?</p>
+      </div>`
+  },
+  {
+    key:"prayer_closing",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Prayer</p>
+        <div class="prayer-card">
+          <p>God, thank you for building rest into the world before you built work ethic into me. I get so used to earning things that I forget rest was never on that list. Help me actually stop this weekend instead of just changing what I'm busy with. Teach me to bring you what I'm carrying instead of gripping it tighter. Thank you for meaning it when you said come as I am.</p>
+        </div>
+        <p class="closing-mark" style="margin-top:26px;">Rest was never something<br/>you had to earn.</p>
+        <div class="share-row">
+          <button class="btn" id="restartBtn">Start again</button>
+        </div>
+        <p class="footnote">Scripture readings: Genesis 2:1&ndash;3 and Matthew 11:28&ndash;30.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
+      </div>`
+  },
+];
+
+let current = 0;
+const viewport = document.getElementById('viewport');
+const progress = document.getElementById('progress');
+const backBtn = document.getElementById('backBtn');
+const nextBtn = document.getElementById('nextBtn');
+const navLabel = document.getElementById('navLabel');
+
+function buildDom(){
+  scenes.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'scene';
+    div.dataset.index = i;
+    div.innerHTML = s.render();
+    viewport.appendChild(div);
+  });
+  for(let i=0;i<scenes.length;i++){
+    const d = document.createElement('div');
+    d.className = 'dot';
+    progress.appendChild(d);
+  }
+}
+
+function render(){
+  const sceneEls = viewport.querySelectorAll('.scene');
+  sceneEls.forEach((el, i) => {
+    el.classList.remove('active','leaving-back');
+    if(i === current){
+      el.classList.add('active');
+    } else if (i < current) {
+      el.classList.add('leaving-back');
+    }
+  });
+  const dots = progress.querySelectorAll('.dot');
+  dots.forEach((d,i) => {
+    d.classList.toggle('current', i === current);
+    d.classList.toggle('visited', i < current);
+  });
+  backBtn.disabled = current === 0;
+  nextBtn.innerHTML = current === scenes.length - 1 ? 'Restart &#8635;' : 'Next &#8594;';
+  navLabel.textContent = `${current + 1} / ${scenes.length}`;
+
+  const restartBtn = document.getElementById('restartBtn');
+  if(restartBtn){
+    restartBtn.onclick = () => { current = 0; render(); };
+  }
+}
+
+function go(delta){
+  const target = current + delta;
+  if(target < 0) return;
+  if(target > scenes.length - 1){
+    current = 0; render(); return;
+  }
+  current = target;
+  render();
+}
+
+backBtn.addEventListener('click', () => go(-1));
+nextBtn.addEventListener('click', () => go(1));
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+});
+
+let touchStartX = null;
+viewport.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+}, {passive:true});
+viewport.addEventListener('touchend', (e) => {
+  if(touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx) > 45){
+    if(dx < 0) go(1); else go(-1);
+  }
+  touchStartX = null;
+}, {passive:true});
+
+buildDom();
+render();
+</script>
+
+</body>
+</html>
