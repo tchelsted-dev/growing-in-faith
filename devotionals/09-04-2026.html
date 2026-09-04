@@ -185,6 +185,67 @@
     line-height:1.5; margin-top:22px;
   }
 
+  /* Shareable photo-backed quote scene. Sits full-bleed behind the
+     progress dots and nav chrome, which stay in their normal place. */
+  .scene.photo{ padding:0; }
+  .photo-bg{
+    position:absolute; inset:0; background-size:cover;
+    background-position:center;
+  }
+  .photo-scrim{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(19,31,43,0.25) 0%, rgba(19,31,43,0.55) 45%, rgba(19,31,43,0.88) 100%);
+  }
+  .photo-content{
+    position:relative; height:100%; box-sizing:border-box;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding: 26px 24px 22px; z-index:1;
+  }
+  .share-top{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    flex-shrink:0;
+  }
+  .share-top-rule{ width:24px; height:2px; background:var(--gold); opacity:0.7; }
+  .share-hero{
+    flex:1; width:100%; display:flex; align-items:center; justify-content:center;
+    padding: 14px 0;
+  }
+  .share-tagline{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size: clamp(23px, 7.2vw, 29px); line-height:1.32; letter-spacing:-0.2px;
+    color:var(--cream); margin:0; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  .share-bottom{
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    width:100%; flex-shrink:0;
+  }
+  .share-divider{
+    width:32px; height:1px; background: var(--gold); opacity:0.65;
+  }
+  .share-verses{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .share-verse{
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size: clamp(14.5px, 4vw, 16px); line-height:1.5; text-align:center;
+    color: rgba(247,241,228,0.88); margin:0 0 4px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+  }
+  .share-cite{
+    font-family:var(--sans); font-size:10px; letter-spacing:1.2px;
+    color: var(--gold); text-transform:uppercase; margin:0; text-align:center;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  }
+  .share-byline{
+    font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:1.5px;
+    color:var(--cream); text-transform:uppercase; margin:0;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+  }
+  .share-actions{ display:flex; gap:10px; justify-content:center; margin-top:2px; }
+  .share-btn{
+    font-family:var(--sans); font-weight:700; font-size:12px;
+    padding:9px 16px; border-radius:16px; cursor:pointer; border:none;
+    background: var(--gold); color: var(--navy-deep);
+  }
+
   #nav{
     flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
     padding: 10px 24px calc(14px + env(safe-area-inset-bottom));
@@ -221,14 +282,43 @@
   <div id="viewport"></div>
   <div id="nav">
     <button class="navbtn" id="backBtn">&#8592; Back</button>
-    <span class="navlabel" id="navLabel">1 / 6</span>
+    <span class="navlabel" id="navLabel">1 / 7</span>
     <button class="navbtn primary" id="nextBtn">Next &#8594;</button>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 const GEN_LINK = "https://www.bible.com/bible/116/GEN.2.1-3.NLT";
 const MAT_LINK = "https://www.bible.com/bible/116/MAT.11.28-30.NLT";
+
+// Shareable-quote background photos. Filenames must match exactly what's
+// uploaded in assets/backgrounds/ (spaces are fine, they're quoted below).
+const BACKGROUND_IMAGES = [
+  "golden wheat field quote.jpg",
+  "misty mountain quote.jpg",
+  "ocean sunset quote.jpg",
+  "sunlight quote.jpg"
+];
+// Picks the same photo for the same date every time (not random per
+// pageview), so a given devotional always shares with the same look.
+function pickBackground(seed){
+  let hash = 0;
+  for(let i=0;i<seed.length;i++){ hash = (hash*31 + seed.charCodeAt(i)) >>> 0; }
+  return BACKGROUND_IMAGES[hash % BACKGROUND_IMAGES.length];
+}
+
+const SHARE_DATE = "September 4";
+// Automatic hash pick for 09-04-2026 lands on "sunlight quote.jpg", which
+// fits a rest theme well (soft, calm morning light), so no manual override.
+const SHARE_IMAGE = pickBackground("09-04-2026");
+const SHARE_TAGLINE = "Rest was never something you had to earn.";
+// Reuses the same two short excerpts already quoted in Section 1 and
+// Section 2 above — no new quoted material.
+const SHARE_VERSES = [
+  { quote: "God blessed the seventh day and declared it holy.", cite: "Genesis 2:3, NLT" },
+  { quote: "Come to me, all of you who are weary and carry heavy burdens.", cite: "Matthew 11:28, NLT" }
+];
 
 const scenes = [
   {
@@ -305,6 +395,35 @@ const scenes = [
         <p class="footnote">Scripture readings: Genesis 2:1&ndash;3 and Matthew 11:28&ndash;30.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
       </div>`
   },
+  {
+    key:"share",
+    photo:true,
+    render: () => `
+      <div class="photo-bg" style="background-image:url('../assets/backgrounds/${SHARE_IMAGE}')"></div>
+      <div class="photo-scrim"></div>
+      <div class="photo-content">
+        <div class="share-top">
+          <p class="share-byline">Growing in Faith &middot; ${SHARE_DATE}</p>
+          <div class="share-top-rule"></div>
+        </div>
+        <div class="share-hero">
+          <p class="share-tagline">${SHARE_TAGLINE}</p>
+        </div>
+        <div class="share-bottom">
+          <div class="share-divider"></div>
+          <div class="share-verses">
+            ${SHARE_VERSES.map(v => `
+            <div>
+              <p class="share-verse">&ldquo;${v.quote}&rdquo;</p>
+              <p class="share-cite">${v.cite}</p>
+            </div>`).join('')}
+          </div>
+          <div class="share-actions">
+            <button class="share-btn" id="shareImageBtn">Share image</button>
+          </div>
+        </div>
+      </div>`
+  },
 ];
 
 let current = 0;
@@ -317,7 +436,7 @@ const navLabel = document.getElementById('navLabel');
 function buildDom(){
   scenes.forEach((s, i) => {
     const div = document.createElement('div');
-    div.className = 'scene';
+    div.className = s.photo ? 'scene photo' : 'scene';
     div.dataset.index = i;
     div.innerHTML = s.render();
     viewport.appendChild(div);
@@ -351,6 +470,46 @@ function render(){
   const restartBtn = document.getElementById('restartBtn');
   if(restartBtn){
     restartBtn.onclick = () => { current = 0; render(); };
+  }
+
+  const shareBtn = document.getElementById('shareImageBtn');
+  if(shareBtn && !shareBtn.dataset.bound){
+    shareBtn.dataset.bound = 'true';
+    shareBtn.onclick = async () => {
+      const original = shareBtn.textContent;
+      shareBtn.textContent = 'Preparing\u2026';
+      shareBtn.disabled = true;
+      try{
+        const target = document.querySelector('.scene.photo');
+        const canvas = await html2canvas(target, {
+          useCORS:true, backgroundColor:null, scale:2,
+          ignoreElements: (el) => el.classList && el.classList.contains('share-actions')
+        });
+        canvas.toBlob(async (blob) => {
+          const fileName = `growing-in-faith-${SHARE_DATE.toLowerCase().replace(/\s+/g,'-')}.png`;
+          const file = new File([blob], fileName, { type:'image/png' });
+          if(navigator.canShare && navigator.canShare({ files:[file] })){
+            try{
+              await navigator.share({ files:[file] });
+            }catch(shareErr){
+              // user backed out of the share sheet, nothing to do
+            }
+          } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          shareBtn.textContent = original;
+          shareBtn.disabled = false;
+        }, 'image/png');
+      }catch(err){
+        shareBtn.textContent = 'Try again';
+        setTimeout(() => { shareBtn.textContent = original; shareBtn.disabled = false; }, 1500);
+      }
+    };
   }
 }
 
