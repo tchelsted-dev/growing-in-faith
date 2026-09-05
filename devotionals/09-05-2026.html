@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>This Isn't the First Fresh Start — September 5</title>
+<style>
+  :root{
+    --navy-deep:#131F2B;
+    --navy:#1F3245;
+    --navy-soft:#2C4258;
+    --gold:#C89B4A;
+    --gold-soft:#8E7440;
+    --cream:#F7F1E4;
+    --cream-dim:#C9C0AC;
+    --sage:#7C9284;
+    --sage-deep:#5C7160;
+    --line: rgba(200,155,74,0.28);
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+    --sans: 'Avenir Next', 'Century Gothic', 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%; overflow:hidden;
+    background: radial-gradient(120% 140% at 50% -10%, var(--navy-soft) 0%, var(--navy) 42%, var(--navy-deep) 100%);
+    font-family:var(--sans); color:var(--cream);
+  }
+  #app{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column;
+    height:100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #progress{
+    display:flex; gap:6px; justify-content:center;
+    padding: 18px 24px 8px;
+    flex-shrink:0;
+  }
+  .dot{
+    height:4px; flex:1; max-width:34px; border-radius:2px;
+    background: rgba(247,241,228,0.16);
+    position:relative; overflow:hidden;
+    transition: background 0.35s ease;
+  }
+  .dot.visited{ background: var(--gold-soft); }
+  .dot.current{ background: var(--gold); }
+
+  #viewport{
+    flex:1; position:relative; overflow:hidden;
+  }
+  .scene{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center;
+    padding: 8px 32px 24px;
+    opacity:0; transform: translateX(24px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events:none;
+    overflow-y:auto;
+  }
+  .scene.active{
+    opacity:1; transform: translateX(0);
+    pointer-events:auto;
+  }
+  .scene.leaving-back{ transform: translateX(-24px); }
+
+  .inner{ max-width: 480px; margin: 0 auto; width:100%; }
+
+  .eyebrow{
+    font-family:var(--sans); font-size:11px; letter-spacing:2px;
+    color: var(--gold); text-transform:uppercase; margin: 0 0 10px;
+    font-weight:600;
+  }
+  h1.hero{
+    font-family:var(--serif); font-weight:700; font-style:normal;
+    font-size: clamp(26px, 7.5vw, 38px); line-height:1.18; color:var(--cream);
+    margin: 0 0 12px;
+  }
+  .tagline{
+    font-family:var(--serif); font-style:italic; font-size:16px;
+    color: var(--cream-dim); line-height:1.5; margin: 0 0 22px;
+  }
+  .voices{
+    display:flex; flex-direction:column; gap:9px; margin-top:6px;
+  }
+  .voice-line{ font-size:14.5px; line-height:1.5; color:var(--cream-dim); }
+  .voice-line b{ color:var(--gold); font-weight:700; letter-spacing:0.5px; }
+
+  .tap-hint{
+    margin-top:34px; font-size:12.5px; color: rgba(247,241,228,0.45);
+    display:flex; align-items:center; gap:6px;
+  }
+  .tap-hint svg{ animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge{ 0%,100%{transform:translateX(0);} 50%{transform:translateX(5px);} }
+
+  .ref-link{
+    display:inline-block; font-family:var(--sans); font-weight:700;
+    font-size:15px; color:var(--gold); text-decoration:none;
+    border-bottom: 1px solid var(--gold); padding-bottom:2px; margin-bottom:16px;
+  }
+  .ref-link:active{ opacity:0.7; }
+
+  p.body-text{
+    font-family:var(--serif); font-size:16px; line-height:1.6;
+    color: var(--cream); margin: 0 0 18px;
+  }
+  blockquote{
+    margin: 0 0 6px; padding-left:16px; border-left: 2px solid var(--gold);
+    font-family:var(--serif); font-style:italic; font-size:18px;
+    line-height:1.5; color:var(--cream);
+  }
+  .cite{
+    font-size:12px; color:var(--gold-soft); margin: 0 0 16px 18px;
+    letter-spacing:0.3px;
+  }
+
+  p.insight{
+    font-family:var(--serif); font-style:italic; font-size:15.5px;
+    line-height:1.65; color: var(--cream); margin:14px 0 0;
+    background: rgba(124,146,132,0.16);
+    border-left: 3px solid var(--sage);
+    border-radius: 0 8px 8px 0;
+    padding: 13px 16px;
+  }
+
+  .badge-stack{ display:flex; flex-direction:column; gap:12px; }
+  .badge{
+    border-radius:10px; padding:16px 18px;
+    border:1px solid var(--line);
+  }
+  .badge.job{ background: rgba(200,155,74,0.10); }
+  .badge.thomas{ background: rgba(247,241,228,0.05); }
+  .badge.jesus{ background: rgba(124,146,132,0.16); }
+  .badge-name{
+    font-family:var(--sans); font-weight:700; font-size:12.5px;
+    letter-spacing:1.5px; color:var(--gold); margin:0 0 5px;
+  }
+  .badge-body{
+    font-family:var(--serif); font-style:italic; font-size:15px;
+    color:var(--cream); margin:0; line-height:1.4;
+  }
+
+  .response-card{
+    background: linear-gradient(160deg, rgba(200,155,74,0.14), rgba(200,155,74,0.03));
+    border:1px solid var(--line); border-radius:12px;
+    padding: 26px 22px; text-align:center;
+  }
+  .response-card p{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size:19px; line-height:1.5; color:var(--cream); margin:0;
+  }
+
+  .qtext{
+    font-family:var(--serif); font-style:italic; font-size:19px;
+    line-height:1.55; color:var(--cream); margin:0;
+  }
+
+  .prayer-card{
+    background: rgba(124,146,132,0.14);
+    border:1px solid rgba(124,146,132,0.4); border-radius:12px;
+    padding: 22px 20px;
+  }
+  .prayer-card p{
+    font-family:var(--serif); font-style:italic; font-size:15.5px;
+    line-height:1.65; color:var(--cream); margin:0;
+  }
+
+  .closing-mark{
+    font-family:var(--serif); font-weight:700; font-style:italic;
+    font-size: clamp(22px, 6.5vw, 28px); line-height:1.4;
+    color:var(--cream); text-align:center; margin: 0 0 28px;
+  }
+  .share-row{
+    display:flex; flex-direction:column; gap:10px; align-items:center;
+  }
+  .btn{
+    font-family:var(--sans); font-weight:700; font-size:14px;
+    color:var(--navy-deep); background:var(--gold);
+    border:none; border-radius:24px; padding:13px 28px;
+    cursor:pointer; letter-spacing:0.3px;
+  }
+  .footnote{
+    font-size:10.5px; color: rgba(247,241,228,0.38); text-align:center;
+    line-height:1.5; margin-top:22px;
+  }
+
+  /* Shareable photo-backed quote scene — the last scene in every
+     devotional. This is the CANONICAL share-image implementation.
+     Two earlier approaches (a canvas-drawn card, then pre-baked PNGs)
+     were built and discarded before this one; do not reinvent this
+     again. It sits full-bleed behind the progress dots and nav
+     chrome, which stay in their normal place. */
+  .scene.photo{ padding:0; }
+  .photo-bg{
+    position:absolute; inset:0; background-size:cover;
+    background-position:center;
+  }
+  .photo-scrim{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(19,31,43,0.25) 0%, rgba(19,31,43,0.55) 45%, rgba(19,31,43,0.88) 100%);
+  }
+  .photo-content{
+    position:relative; height:100%; box-sizing:border-box;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding: 26px 24px 22px; z-index:1;
+  }
+  .share-top{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    flex-shrink:0;
+  }
+  .share-top-rule{ width:24px; height:2px; background:var(--gold); opacity:0.7; }
+  .share-hero{
+    flex:1; width:100%; display:flex; align-items:center; justify-content:center;
+    padding: 14px 0;
+  }
+  .share-tagline{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size: clamp(23px, 7.2vw, 29px); line-height:1.32; letter-spacing:-0.2px;
+    color:var(--cream); margin:0; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  .share-bottom{
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    width:100%; flex-shrink:0;
+  }
+  .share-divider{
+    width:32px; height:1px; background: var(--gold); opacity:0.65;
+  }
+  .share-verses{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .share-verse{
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size: clamp(14.5px, 4vw, 16px); line-height:1.5; text-align:center;
+    color: rgba(247,241,228,0.88); margin:0 0 4px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+  }
+  .share-cite{
+    font-family:var(--sans); font-size:10px; letter-spacing:1.2px;
+    color: var(--gold); text-transform:uppercase; margin:0; text-align:center;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  }
+  .share-byline{
+    font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:1.5px;
+    color:var(--cream); text-transform:uppercase; margin:0;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+  }
+  .share-actions{ display:flex; gap:10px; justify-content:center; margin-top:2px; }
+  .share-btn{
+    font-family:var(--sans); font-weight:700; font-size:12px;
+    padding:9px 16px; border-radius:16px; cursor:pointer; border:none;
+    background: var(--gold); color: var(--navy-deep);
+  }
+
+  #nav{
+    flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 24px calc(14px + env(safe-area-inset-bottom));
+    gap:14px;
+  }
+  .navbtn{
+    font-family:var(--sans); font-size:13px; font-weight:700;
+    color: var(--cream); background: rgba(247,241,228,0.08);
+    border:1px solid rgba(247,241,228,0.14); border-radius:22px;
+    padding: 11px 20px; cursor:pointer; letter-spacing:0.3px;
+    display:flex; align-items:center; gap:6px;
+    transition: opacity 0.2s ease;
+  }
+  .navbtn[disabled]{ opacity:0.25; pointer-events:none; }
+  .navbtn.primary{ background: var(--gold); color: var(--navy-deep); border-color:transparent; }
+  .navlabel{
+    font-size:11px; color: rgba(247,241,228,0.4); letter-spacing:1px;
+    font-family:var(--sans);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scene, .tap-hint svg { transition:none; animation:none; }
+  }
+
+  @media (min-width:640px){
+    .scene{ padding: 8px 60px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="progress"></div>
+  <div id="viewport"></div>
+  <div id="nav">
+    <button class="navbtn" id="backBtn">&#8592; Back</button>
+    <span class="navlabel" id="navLabel">1 / 7</span>
+    <button class="navbtn primary" id="nextBtn">Next &#8594;</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const NEH_LINK = "https://www.bible.com/bible/116/NEH.8.1-12.NLT";
+const COR_LINK = "https://www.bible.com/bible/116/2CO.4.16-18.NLT";
+
+/* ============================================================
+   SHARE IMAGE — core feature, present in every devotional.
+   CANONICAL implementation (do not replace with a canvas-drawn card
+   or pre-baked PNGs — both were tried and discarded before this):
+   the last scene in `scenes` is a full-bleed photo scene (photo:true)
+   using a real background photo from assets/backgrounds/ in the repo
+   (referenced by relative path from devotionals/, so it resolves once
+   uploaded — it will NOT render in a local/sandboxed preview that
+   doesn't have that file, that's expected, not a bug), a short
+   tagline, the devotional's two verse excerpts reused as-is (no new
+   quoted material), and a "Share image" button. That button uses
+   html2canvas to screenshot just that scene element (ignoring the
+   button itself) and either opens the native share sheet or
+   downloads the PNG.
+   ============================================================ */
+
+// Known background photo assets in assets/backgrounds/ as of the last
+// confirmed working devotional. If new images have been added since,
+// ask the user for the current filename list before assuming this is
+// complete — do not guess new filenames.
+const BACKGROUND_IMAGES = [
+  "golden wheat field quote.jpg",
+  "misty mountain quote.jpg",
+  "ocean sunset quote.jpg",
+  "sunlight quote.jpg"
+];
+// Picks the same photo for the same date every time (not random per
+// pageview), so a given devotional always shares with the same look.
+function pickBackground(seed){
+  let hash = 0;
+  for(let i=0;i<seed.length;i++){ hash = (hash*31 + seed.charCodeAt(i)) >>> 0; }
+  return BACKGROUND_IMAGES[hash % BACKGROUND_IMAGES.length];
+}
+
+// Per-devotional share data — this is the only part that changes
+// when adapting this template. SHARE_IMAGE can be the automatic
+// pickBackground() result or a manual override when one image fits
+// the theme noticeably better than the hash pick (leave a comment
+// explaining why, as below).
+const SHARE_DATE = "September 5";
+// Manual override: golden wheat field fits a harvest-time, fall,
+// back-to-school "fresh start" theme better than whatever the
+// automatic hash pick would land on.
+const SHARE_IMAGE = "golden wheat field quote.jpg";
+const SHARE_TAGLINE = "New seasons keep coming because renewal was never a one-time thing.";
+// Reuses the same two short excerpts already quoted in Section 1 and
+// Section 2 above — no new quoted material.
+const SHARE_VERSES = [
+  { quote: "Don't be dejected and sad, for the joy of the LORD is your strength.", cite: "Nehemiah 8:10, NLT" },
+  { quote: "Our spirits are being renewed every day.", cite: "2 Corinthians 4:16, NLT" }
+];
+
+const scenes = [
+  {
+    key:"intro",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">September 5 &middot; Devotional</p>
+        <h1 class="hero">This Isn't the<br/>First Fresh Start</h1>
+        <p class="tagline">Buses are running again. Routines are resetting. So is something good in you.</p>
+        <div class="voices">
+          <p class="voice-line"><b>NEHEMIAH</b> &nbsp;We gathered, we listened, and instead of mourning, we were told to celebrate.</p>
+          <p class="voice-line"><b>PAUL</b> &nbsp;My body wears down, but something in me keeps getting renewed anyway.</p>
+        </div>
+        <div class="tap-hint">
+          Swipe or tap Next to begin
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>`
+  },
+  {
+    key:"nehemiah",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">1 of 2 &middot; Nehemiah</p>
+        <a class="ref-link" href="${NEH_LINK}" target="_blank" rel="noopener">Nehemiah 8:1&ndash;12 &#8599;</a>
+        <p class="body-text">This whole scene happens in the seventh month, the start of Israel's own new year rhythm, not just a random gathering. The people hear the Law read aloud, realize how far they've drifted, and start weeping right there in the street. Nehemiah stops them. He tells them this day is holy, not sorrowful, and sends them off to eat well and celebrate instead.</p>
+        <blockquote>&ldquo;Don't be dejected and sad, for the joy of the LORD is your strength.&rdquo;</blockquote>
+        <p class="cite">Nehemiah 8:10, NLT</p>
+        <p class="insight">The instinct to mourn a fresh start, to feel behind before it even begins, is old and human. Nehemiah's answer isn't to pretend nothing needs to change. It's to say the new season itself is the good news, not something to feel guilty about needing.</p>
+      </div>`
+  },
+  {
+    key:"paul",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">2 of 2 &middot; Paul</p>
+        <a class="ref-link" href="${COR_LINK}" target="_blank" rel="noopener">2 Corinthians 4:16&ndash;18 &#8599;</a>
+        <p class="body-text">Paul isn't describing a one-time turnaround here. He's naming something that happens on a loop, every single day, regardless of how worn out the outside of life looks. This isn't a dramatic before-and-after. It's an ongoing, repeating renewal that doesn't need a big moment to kick it off.</p>
+        <blockquote>&ldquo;Our spirits are being renewed every day.&rdquo;</blockquote>
+        <p class="cite">2 Corinthians 4:16, NLT</p>
+        <p class="insight">A new season doesn't work because this time will finally be different for good. It works because renewal was never supposed to be a one-time event in the first place. It's built to repeat, on purpose.</p>
+      </div>`
+  },
+  {
+    key:"badges",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">The two voices</p>
+        <div class="badge-stack">
+          <div class="badge job">
+            <p class="badge-name">NEHEMIAH</p>
+            <p class="badge-body">Turned a moment for guilt into a reason to celebrate.</p>
+          </div>
+          <div class="badge jesus">
+            <p class="badge-name">PAUL</p>
+            <p class="badge-body">Found daily renewal instead of waiting on one big fix.</p>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    key:"response",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">My response</p>
+        <div class="response-card">
+          <p>&ldquo;I don't have to earn a fresh start or feel fully ready for one. It just keeps showing up, on schedule, whether I'm ready or not.&rdquo;</p>
+        </div>
+      </div>`
+  },
+  {
+    key:"question",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Question to sit with</p>
+        <p class="qtext">What's one small routine restarting this season that you could actually look forward to instead of just getting through?</p>
+      </div>`
+  },
+  {
+    key:"prayer_closing",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Prayer</p>
+        <div class="prayer-card">
+          <p>God, thank you for building rhythm into the year itself, seasons that turn whether I feel prepared or not. Help me meet this new season with joy instead of pressure to get everything right this time. Thank you that renewal isn't a one-shot deal I can miss out on. Let today feel like a genuinely good beginning, not just another reset I have to manage.</p>
+        </div>
+        <p class="closing-mark" style="margin-top:26px;">New seasons keep coming<br/>because renewal was never a one-time thing.</p>
+        <div class="share-row">
+          <button class="btn" id="restartBtn">Start again</button>
+        </div>
+        <p class="footnote">Scripture readings: Nehemiah 8:1&ndash;12 and 2 Corinthians 4:16&ndash;18.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
+      </div>`
+  },
+  {
+    key:"share",
+    photo:true,
+    render: () => `
+      <div class="photo-bg" style="background-image:url('../assets/backgrounds/${SHARE_IMAGE}')"></div>
+      <div class="photo-scrim"></div>
+      <div class="photo-content">
+        <div class="share-top">
+          <p class="share-byline">Growing in Faith &middot; ${SHARE_DATE}</p>
+          <div class="share-top-rule"></div>
+        </div>
+        <div class="share-hero">
+          <p class="share-tagline">${SHARE_TAGLINE}</p>
+        </div>
+        <div class="share-bottom">
+          <div class="share-divider"></div>
+          <div class="share-verses">
+            ${SHARE_VERSES.map(v => `
+            <div>
+              <p class="share-verse">&ldquo;${v.quote}&rdquo;</p>
+              <p class="share-cite">${v.cite}</p>
+            </div>`).join('')}
+          </div>
+          <div class="share-actions">
+            <button class="share-btn" id="shareImageBtn">Share image</button>
+          </div>
+        </div>
+      </div>`
+  },
+];
+
+let current = 0;
+const viewport = document.getElementById('viewport');
+const progress = document.getElementById('progress');
+const backBtn = document.getElementById('backBtn');
+const nextBtn = document.getElementById('nextBtn');
+const navLabel = document.getElementById('navLabel');
+
+function buildDom(){
+  scenes.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = s.photo ? 'scene photo' : 'scene';
+    div.dataset.index = i;
+    div.innerHTML = s.render();
+    viewport.appendChild(div);
+  });
+  for(let i=0;i<scenes.length;i++){
+    const d = document.createElement('div');
+    d.className = 'dot';
+    progress.appendChild(d);
+  }
+}
+
+function render(){
+  const sceneEls = viewport.querySelectorAll('.scene');
+  sceneEls.forEach((el, i) => {
+    el.classList.remove('active','leaving-back');
+    if(i === current){
+      el.classList.add('active');
+    } else if (i < current) {
+      el.classList.add('leaving-back');
+    }
+  });
+  const dots = progress.querySelectorAll('.dot');
+  dots.forEach((d,i) => {
+    d.classList.toggle('current', i === current);
+    d.classList.toggle('visited', i < current);
+  });
+  backBtn.disabled = current === 0;
+  nextBtn.innerHTML = current === scenes.length - 1 ? 'Restart &#8635;' : 'Next &#8594;';
+  navLabel.textContent = `${current + 1} / ${scenes.length}`;
+
+  const restartBtn = document.getElementById('restartBtn');
+  if(restartBtn){
+    restartBtn.onclick = () => { current = 0; render(); };
+  }
+
+  const shareBtn = document.getElementById('shareImageBtn');
+  if(shareBtn && !shareBtn.dataset.bound){
+    shareBtn.dataset.bound = 'true';
+    shareBtn.onclick = async () => {
+      const original = shareBtn.textContent;
+      shareBtn.textContent = 'Preparing\u2026';
+      shareBtn.disabled = true;
+      try{
+        const target = document.querySelector('.scene.photo');
+        const canvas = await html2canvas(target, {
+          useCORS:true, backgroundColor:null, scale:2,
+          ignoreElements: (el) => el.classList && el.classList.contains('share-actions')
+        });
+        canvas.toBlob(async (blob) => {
+          const fileName = `growing-in-faith-${SHARE_DATE.toLowerCase().replace(/\s+/g,'-')}.png`;
+          const file = new File([blob], fileName, { type:'image/png' });
+          if(navigator.canShare && navigator.canShare({ files:[file] })){
+            try{
+              await navigator.share({ files:[file] });
+            }catch(shareErr){
+              // user backed out of the share sheet, nothing to do
+            }
+          } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          shareBtn.textContent = original;
+          shareBtn.disabled = false;
+        }, 'image/png');
+      }catch(err){
+        shareBtn.textContent = 'Try again';
+        setTimeout(() => { shareBtn.textContent = original; shareBtn.disabled = false; }, 1500);
+      }
+    };
+  }
+}
+
+function go(delta){
+  const target = current + delta;
+  if(target < 0) return;
+  if(target > scenes.length - 1){
+    current = 0; render(); return;
+  }
+  current = target;
+  render();
+}
+
+backBtn.addEventListener('click', () => go(-1));
+nextBtn.addEventListener('click', () => go(1));
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+});
+
+let touchStartX = null;
+viewport.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+}, {passive:true});
+viewport.addEventListener('touchend', (e) => {
+  if(touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx) > 45){
+    if(dx < 0) go(1); else go(-1);
+  }
+  touchStartX = null;
+}, {passive:true});
+
+buildDom();
+render();
+</script>
+
+</body>
+</html>
