@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
-<title>Content With What's In Your Hands — September 7</title>
+<title>You Weren't Meant to Carry This Alone — September 6</title>
 <style>
   :root{
     --navy-deep:#131F2B;
@@ -293,8 +293,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-const ECC_LINK = "https://www.bible.com/bible/116/ECC.4.4-6.NLT";
-const PHIL_LINK = "https://www.bible.com/bible/116/PHP.4.10-13.NLT";
+const EXO_LINK = "https://www.bible.com/bible/116/EXO.17.8-13.NLT";
+const MRK_LINK = "https://www.bible.com/bible/116/MRK.2.1-12.NLT";
 
 /* ============================================================
    SHARE IMAGE — core feature, present in every devotional.
@@ -335,18 +335,17 @@ function pickBackground(seed){
 // pickBackground() result or a manual override when one image fits
 // the theme noticeably better than the hash pick (leave a comment
 // explaining why, as below).
-const SHARE_DATE = "September 7";
-// Manual override: golden wheat field was used two days ago (Sept 5)
-// and sunlight was used yesterday (Sept 6). Ocean sunset fits this
-// theme’s quiet, unhurried contentment better than the automatic
-// hash pick anyway, and keeps three days in a row visually distinct.
-const SHARE_IMAGE = "ocean sunset quote.jpg";
-const SHARE_TAGLINE = "You don’t need two full hands to already have enough.";
+const SHARE_DATE = "September 6";
+// Manual override: misty mountain fits a "somebody else is holding
+// you up" theme better than whatever the automatic hash pick would
+// land on. It reads like a climb you wouldn't want to make solo.
+const SHARE_IMAGE = "misty mountain quote.jpg";
+const SHARE_TAGLINE = "Faith was never meant to be carried alone.";
 // Reuses the same two short excerpts already quoted in Section 1 and
-// Section 2 above, no new quoted material.
+// Section 2 above — no new quoted material.
 const SHARE_VERSES = [
-  { quote: "Better to have one handful with quietness than two handfuls with hard work…", cite: "Ecclesiastes 4:6, NLT" },
-  { quote: "I have learned how to be content with whatever I have.", cite: "Philippians 4:11, NLT" }
+  { quote: "They stood on each side of Moses, holding up his hands.", cite: "Exodus 17:12, NLT" },
+  { quote: "Four men arrived carrying a paralyzed man on a mat.", cite: "Mark 2:3, NLT" }
 ];
 
 const scenes = [
@@ -354,12 +353,12 @@ const scenes = [
     key:"intro",
     render: () => `
       <div class="inner">
-        <p class="eyebrow">September 7 &middot; Devotional</p>
-        <h1 class="hero">Content With What's<br/>In Your Hands</h1>
-        <p class="tagline">You don't have to outwork anybody to already have enough.</p>
+        <p class="eyebrow">September 6 &middot; Devotional</p>
+        <h1 class="hero">You Weren't Meant<br/>to Carry This Alone</h1>
+        <p class="tagline">Some things were never meant to be done by yourself.</p>
         <div class="voices">
-          <p class="voice-line"><b>SOLOMON</b> &nbsp;Most of us work hard because we're watching somebody else's pile, not because we need to.</p>
-          <p class="voice-line"><b>PAUL</b> &nbsp;I learned to be okay whether I have a little or a lot.</p>
+          <p class="voice-line"><b>MOSES</b> &nbsp;My own arms couldn't win this by themselves, so somebody else held them up.</p>
+          <p class="voice-line"><b>THE FRIENDS</b> &nbsp;We couldn't get him through the door, so we made our own way in.</p>
         </div>
         <div class="tap-hint">
           Swipe or tap Next to begin
@@ -368,27 +367,27 @@ const scenes = [
       </div>`
   },
   {
-    key:"solomon",
+    key:"moses",
     render: () => `
       <div class="inner">
-        <p class="eyebrow">1 of 2 &middot; Solomon</p>
-        <a class="ref-link" href="${ECC_LINK}" target="_blank" rel="noopener">Ecclesiastes 4:4&ndash;6 &#8599;</a>
-        <p class="body-text">Solomon watches people work themselves into the ground and notices something uncomfortable. Most of that drive isn't coming from actual need. It's coming from watching what the neighbor has and wanting to keep up. He doesn't say working hard is bad. He just says a quiet, smaller life beats a bigger one built on comparison.</p>
-        <blockquote>&ldquo;Better to have one handful with quietness than two handfuls with hard work&hellip;&rdquo;</blockquote>
-        <p class="cite">Ecclesiastes 4:6, NLT</p>
-        <p class="insight">It's easy to tell yourself you're just being driven or ambitious. Solomon's question is blunter than that: driven toward what, and why. A full hand you're actually at peace with beats two full hands you can't enjoy.</p>
+        <p class="eyebrow">1 of 2 &middot; Moses</p>
+        <a class="ref-link" href="${EXO_LINK}" target="_blank" rel="noopener">Exodus 17:8&ndash;13 &#8599;</a>
+        <p class="body-text">Israel is fighting a battle they can't afford to lose, and Moses is up on a hill with his arms raised, holding the staff of God. As long as his hands stay up, the fight goes their way. But arms get tired no matter how much you believe in the reason you're holding them up. Aaron and Hur don't tell him to push through it. They give him a rock to sit on and hold his arms up themselves, one on each side, until the sun goes down.</p>
+        <blockquote>&ldquo;They stood on each side of Moses, holding up his hands.&rdquo;</blockquote>
+        <p class="cite">Exodus 17:12, NLT</p>
+        <p class="insight">Nobody in this story acts like Moses should've been able to hold his own arms up all day. They just notice he can't, and step in. Maybe the strongest thing you can do isn't gritting it out alone. It's letting somebody else take some of the weight.</p>
       </div>`
   },
   {
-    key:"paul",
+    key:"friends",
     render: () => `
       <div class="inner">
-        <p class="eyebrow">2 of 2 &middot; Paul</p>
-        <a class="ref-link" href="${PHIL_LINK}" target="_blank" rel="noopener">Philippians 4:10&ndash;13 &#8599;</a>
-        <p class="body-text">Paul writes this from prison, which makes it land differently. He's had plenty and he's had nothing, and somewhere in between he picked up something most people spend their whole life chasing. He stopped needing his circumstances to look a certain way before he'd be okay. That's not the same as not caring about his work or his needs. His peace just quit depending on the outcome.</p>
-        <blockquote>&ldquo;I have learned how to be content with whatever I have.&rdquo;</blockquote>
-        <p class="cite">Philippians 4:11, NLT</p>
-        <p class="insight">Paul didn't learn this by finally getting everything he wanted. He learned it by having both plenty and nothing and noticing his peace didn't actually come from either one. That's not resignation. That's freedom.</p>
+        <p class="eyebrow">2 of 2 &middot; The Friends</p>
+        <a class="ref-link" href="${MRK_LINK}" target="_blank" rel="noopener">Mark 2:1&ndash;12 &#8599;</a>
+        <p class="body-text">The house where Jesus is teaching is so packed there's no way to get near the door, let alone inside. Four friends show up carrying a man who can't walk on his own, and instead of turning around, they climb up, tear open the roof, and lower him down right in front of Jesus. Nobody asked them to go to that much trouble. They just didn't see another way to get their friend what he needed.</p>
+        <blockquote>&ldquo;Four men arrived carrying a paralyzed man on a mat.&rdquo;</blockquote>
+        <p class="cite">Mark 2:3, NLT</p>
+        <p class="insight">Jesus responds to their faith before the man on the mat even says a word. Sometimes the thing that gets you in front of God isn't your own effort. It's somebody who refused to leave you outside.</p>
       </div>`
   },
   {
@@ -398,12 +397,12 @@ const scenes = [
         <p class="eyebrow">The two voices</p>
         <div class="badge-stack">
           <div class="badge job">
-            <p class="badge-name">SOLOMON</p>
-            <p class="badge-body">Noticed most hustle is really just watching somebody else's pile.</p>
+            <p class="badge-name">MOSES</p>
+            <p class="badge-body">Let his arms get held up instead of pretending he didn't need it.</p>
           </div>
           <div class="badge jesus">
-            <p class="badge-name">PAUL</p>
-            <p class="badge-body">Learned to be okay with whatever was actually in his hands.</p>
+            <p class="badge-name">THE FRIENDS</p>
+            <p class="badge-body">Tore open a roof rather than leave their friend outside.</p>
           </div>
         </div>
       </div>`
@@ -414,7 +413,7 @@ const scenes = [
       <div class="inner">
         <p class="eyebrow">My response</p>
         <div class="response-card">
-          <p>&ldquo;I don't have to win the comparison to already be doing enough. My peace was never supposed to depend on having more than the next person.&rdquo;</p>
+          <p>&ldquo;I don't have to hold everything up on my own, and I don't have to wait to be asked before I help somebody else carry theirs.&rdquo;</p>
         </div>
       </div>`
   },
@@ -423,7 +422,7 @@ const scenes = [
     render: () => `
       <div class="inner">
         <p class="eyebrow">Question to sit with</p>
-        <p class="qtext">Where in your work are you competing with somebody instead of just doing it well?</p>
+        <p class="qtext">Is there something you're carrying right now that you could actually let someone else help you hold up?</p>
       </div>`
   },
   {
@@ -432,13 +431,13 @@ const scenes = [
       <div class="inner">
         <p class="eyebrow">Prayer</p>
         <div class="prayer-card">
-          <p>God, thank you for the work in front of me today, even the ordinary parts of it. I don't want to spend it wishing I had somebody else's hands instead of my own. Help me actually be at peace with what I've been given, not just say I am while I keep score anyway. Teach me the kind of contentment Paul had, the kind that doesn't depend on how things stack up against anyone else. Let today be enough, because you've already made it enough.</p>
+          <p>God, thank you for the people who show up and hold on when I can't keep my own arms up. Forgive me for the times I've tried to carry things alone that were never meant to be carried alone. Help me notice when someone around me needs a way in, even if it means doing something a little inconvenient to make it happen. Give me the humility to ask for help and the willingness to offer it before I'm asked. Thank you that faith was never supposed to be a solo thing.</p>
         </div>
-        <p class="closing-mark" style="margin-top:26px;">You don't need two full hands<br/>to already have enough.</p>
+        <p class="closing-mark" style="margin-top:26px;">You weren't meant to carry this alone.<br/>Let somebody help.</p>
         <div class="share-row">
           <button class="btn" id="restartBtn">Start again</button>
         </div>
-        <p class="footnote">Scripture readings: Ecclesiastes 4:4&ndash;6 and Philippians 4:10&ndash;13.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
+        <p class="footnote">Scripture readings: Exodus 17:8&ndash;13 and Mark 2:1&ndash;12.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
       </div>`
   },
   {
