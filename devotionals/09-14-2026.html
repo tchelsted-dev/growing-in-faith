@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
-<title>Right Beside You the Whole Time: September 14</title>
+<title>Right Beside You the Whole Time &mdash; September 14</title>
 <style>
   :root{
     --navy-deep:#131F2B;
@@ -52,7 +52,7 @@
   }
   .scene{
     position:absolute; inset:0;
-    display:flex; flex-direction:column; justify-content:center;
+    display:flex; flex-direction:column; justify-content:safe center;
     padding: 8px 32px 24px;
     opacity:0; transform: translateX(24px);
     transition: opacity 0.45s ease, transform 0.45s ease;
@@ -183,15 +183,70 @@
     color:var(--navy-deep); background:var(--gold);
     border:none; border-radius:24px; padding:13px 28px;
     cursor:pointer; letter-spacing:0.3px;
-    width:100%; max-width:280px;
-  }
-  .btn.secondary{
-    background:transparent; color:var(--cream);
-    border:1px solid rgba(247,241,228,0.3);
   }
   .footnote{
     font-size:10.5px; color: rgba(247,241,228,0.38); text-align:center;
     line-height:1.5; margin-top:22px;
+  }
+
+  /* Shareable photo-backed quote scene, canonical implementation. */
+  .scene.photo{ padding:0; }
+  .photo-bg{
+    position:absolute; inset:0; background-size:cover;
+    background-position:center;
+  }
+  .photo-scrim{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(19,31,43,0.25) 0%, rgba(19,31,43,0.55) 45%, rgba(19,31,43,0.88) 100%);
+  }
+  .photo-content{
+    position:relative; height:100%; box-sizing:border-box;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding: 26px 24px 22px; z-index:1;
+  }
+  .share-top{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    flex-shrink:0;
+  }
+  .share-top-rule{ width:24px; height:2px; background:var(--gold); opacity:0.7; }
+  .share-hero{
+    flex:1; width:100%; display:flex; align-items:center; justify-content:center;
+    padding: 14px 0;
+  }
+  .share-tagline{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size: clamp(23px, 7.2vw, 29px); line-height:1.32; letter-spacing:-0.2px;
+    color:var(--cream); margin:0; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  .share-bottom{
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    width:100%; flex-shrink:0;
+  }
+  .share-divider{
+    width:32px; height:1px; background: var(--gold); opacity:0.65;
+  }
+  .share-verses{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .share-verse{
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size: clamp(14.5px, 4vw, 16px); line-height:1.5; text-align:center;
+    color: rgba(247,241,228,0.88); margin:0 0 4px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+  }
+  .share-cite{
+    font-family:var(--sans); font-size:10px; letter-spacing:1.2px;
+    color: var(--gold); text-transform:uppercase; margin:0; text-align:center;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  }
+  .share-byline{
+    font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:1.5px;
+    color:var(--cream); text-transform:uppercase; margin:0;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+  }
+  .share-actions{ display:flex; gap:10px; justify-content:center; margin-top:2px; }
+  .share-btn{
+    font-family:var(--sans); font-weight:700; font-size:12px;
+    padding:9px 16px; border-radius:16px; cursor:pointer; border:none;
+    background: var(--gold); color: var(--navy-deep);
   }
 
   #nav{
@@ -222,6 +277,7 @@
     .scene{ padding: 8px 60px 24px; }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -230,7 +286,7 @@
   <div id="viewport"></div>
   <div id="nav">
     <button class="navbtn" id="backBtn">&#8592; Back</button>
-    <span class="navlabel" id="navLabel">1 / 7</span>
+    <span class="navlabel" id="navLabel">1 / 8</span>
     <button class="navbtn primary" id="nextBtn">Next &#8594;</button>
   </div>
 </div>
@@ -238,6 +294,13 @@
 <script>
 const KI_LINK = "https://www.bible.com/bible/116/1KI.19.9-18.NLT";
 const LUK_LINK = "https://www.bible.com/bible/116/LUK.24.13-35.NLT";
+const SHARE_DATE = "September 14";
+const SHARE_IMAGE = "misty mountain quote.jpg";
+const SHARE_TAGLINE = "He was already walking beside you, even when you didn't recognize Him.";
+const SHARE_VERSES = [
+  { quote: "I am the only one left, and now they are trying to kill me, too.", cite: "1 Kings 19:10, NLT" },
+  { quote: "Didn't our hearts burn within us as he talked with us on the road?", cite: "Luke 24:32, NLT" }
+];
 
 const scenes = [
   {
@@ -322,14 +385,42 @@ const scenes = [
       <div class="inner">
         <p class="eyebrow">Prayer</p>
         <div class="prayer-card">
-          <p>God, there are seasons where I feel like I'm the only one still trying, still showing up, still caring about the things that matter to You. I don't always see You walking next to me while I'm in the middle of it. Thank You for being present even when I can't recognize it in the moment. Help me trust that You're closer than I feel today, and give me the eyes to see it sooner next time. Amen.</p>
+          <p>God, there are days I feel like I'm the only one still trying. I don't always see You walking next to me while I'm in the middle of it. Thank You for being present even when I can't recognize it. Help me trust You're closer than I feel today, and give me eyes to see it sooner. Amen.</p>
         </div>
         <p class="closing-mark" style="margin-top:26px;">He was already walking beside you.<br/>You just hadn't recognized Him yet.</p>
         <div class="share-row">
-          <button class="btn" id="shareBtn">Share this devotional</button>
-          <button class="btn secondary" id="restartBtn">Start again</button>
+          <button class="btn" id="restartBtn">Start again</button>
         </div>
         <p class="footnote">Scripture readings: 1 Kings 19:9&ndash;18 and Luke 24:13&ndash;35.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
+      </div>`
+  },
+  {
+    key:"share",
+    photo:true,
+    render: () => `
+      <div class="photo-bg" style="background-image:url('../assets/backgrounds/${SHARE_IMAGE}')"></div>
+      <div class="photo-scrim"></div>
+      <div class="photo-content">
+        <div class="share-top">
+          <p class="share-byline">Growing in Faith &middot; ${SHARE_DATE}</p>
+          <div class="share-top-rule"></div>
+        </div>
+        <div class="share-hero">
+          <p class="share-tagline">${SHARE_TAGLINE}</p>
+        </div>
+        <div class="share-bottom">
+          <div class="share-divider"></div>
+          <div class="share-verses">
+            ${SHARE_VERSES.map(v => `
+            <div>
+              <p class="share-verse">&ldquo;${v.quote}&rdquo;</p>
+              <p class="share-cite">${v.cite}</p>
+            </div>`).join('')}
+          </div>
+          <div class="share-actions">
+            <button class="share-btn" id="shareImageBtn">Share image</button>
+          </div>
+        </div>
       </div>`
   },
 ];
@@ -344,7 +435,7 @@ const navLabel = document.getElementById('navLabel');
 function buildDom(){
   scenes.forEach((s, i) => {
     const div = document.createElement('div');
-    div.className = 'scene';
+    div.className = s.photo ? 'scene photo' : 'scene';
     div.dataset.index = i;
     div.innerHTML = s.render();
     viewport.appendChild(div);
@@ -380,23 +471,40 @@ function render(){
     restartBtn.onclick = () => { current = 0; render(); };
   }
 
-  const shareBtn = document.getElementById('shareBtn');
+  const shareBtn = document.getElementById('shareImageBtn');
   if(shareBtn){
     shareBtn.onclick = async () => {
-      const shareData = {
-        title: "You're Allowed to Be Tired",
-        text: "Today's devotional: You're Allowed to Be Tired",
-        url: window.location.href
-      };
-      if(navigator.share){
-        try { await navigator.share(shareData); } catch(e) { /* user cancelled */ }
-      } else if(navigator.clipboard){
-        try {
-          await navigator.clipboard.writeText(window.location.href);
-          const original = shareBtn.textContent;
-          shareBtn.textContent = 'Link copied!';
-          setTimeout(() => { shareBtn.textContent = original; }, 2000);
-        } catch(e) { /* clipboard unavailable */ }
+      const original = shareBtn.textContent;
+      shareBtn.textContent = 'Preparing…';
+      shareBtn.disabled = true;
+      try{
+        const target = document.querySelector('.scene.photo');
+        const canvas = await html2canvas(target, {
+          useCORS:true, backgroundColor:null, scale:2,
+          ignoreElements: (el) => el.classList && el.classList.contains('share-actions')
+        });
+        canvas.toBlob(async (blob) => {
+          const fileName = `growing-in-faith-${SHARE_DATE.toLowerCase().replace(/\s+/g,'-')}.png`;
+          const file = new File([blob], fileName, { type:'image/png' });
+          if(navigator.canShare && navigator.canShare({ files:[file] })){
+            try{
+              await navigator.share({ files:[file] });
+            }catch(shareErr){
+            }
+          } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          shareBtn.textContent = original;
+          shareBtn.disabled = false;
+        }, 'image/png');
+      }catch(err){
+        shareBtn.textContent = 'Try again';
+        setTimeout(() => { shareBtn.textContent = original; shareBtn.disabled = false; }, 1500);
       }
     };
   }
