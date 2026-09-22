@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>Borrowed Trouble — September 22</title>
+<style>
+  :root{
+    --navy-deep:#131F2B;
+    --navy:#1F3245;
+    --navy-soft:#2C4258;
+    --gold:#C89B4A;
+    --gold-soft:#8E7440;
+    --cream:#F7F1E4;
+    --cream-dim:#C9C0AC;
+    --sage:#7C9284;
+    --sage-deep:#5C7160;
+    --line: rgba(200,155,74,0.28);
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+    --sans: 'Avenir Next', 'Century Gothic', 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%; overflow:hidden;
+    background: radial-gradient(120% 140% at 50% -10%, var(--navy-soft) 0%, var(--navy) 42%, var(--navy-deep) 100%);
+    font-family:var(--sans); color:var(--cream);
+  }
+  #app{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column;
+    height:100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #progress{
+    display:flex; gap:6px; justify-content:center;
+    padding: 18px 24px 8px;
+    flex-shrink:0;
+  }
+  .dot{
+    height:4px; flex:1; max-width:34px; border-radius:2px;
+    background: rgba(247,241,228,0.16);
+    position:relative; overflow:hidden;
+    transition: background 0.35s ease;
+  }
+  .dot.visited{ background: var(--gold-soft); }
+  .dot.current{ background: var(--gold); }
+
+  #viewport{
+    flex:1; position:relative; overflow:hidden;
+  }
+  .scene{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:safe center;
+    padding: 8px 32px 24px;
+    opacity:0; transform: translateX(24px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events:none;
+    overflow-y:auto;
+  }
+  .scene.active{
+    opacity:1; transform: translateX(0);
+    pointer-events:auto;
+  }
+  .scene.leaving-back{ transform: translateX(-24px); }
+
+  .inner{ max-width: 480px; margin: 0 auto; width:100%; }
+
+  .eyebrow{
+    font-family:var(--sans); font-size:11px; letter-spacing:2px;
+    color: var(--gold); text-transform:uppercase; margin: 0 0 10px;
+    font-weight:600;
+  }
+  h1.hero{
+    font-family:var(--serif); font-weight:700; font-style:normal;
+    font-size: clamp(26px, 7.5vw, 38px); line-height:1.18; color:var(--cream);
+    margin: 0 0 12px;
+  }
+  .tagline{
+    font-family:var(--serif); font-style:italic; font-size:16px;
+    color: var(--cream-dim); line-height:1.5; margin: 0 0 22px;
+  }
+  .voices{
+    display:flex; flex-direction:column; gap:9px; margin-top:6px;
+  }
+  .voice-line{ font-size:14.5px; line-height:1.5; color:var(--cream-dim); }
+  .voice-line b{ color:var(--gold); font-weight:700; letter-spacing:0.5px; }
+
+  .tap-hint{
+    margin-top:34px; font-size:12.5px; color: rgba(247,241,228,0.45);
+    display:flex; align-items:center; gap:6px;
+  }
+  .tap-hint svg{ animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge{ 0%,100%{transform:translateX(0);} 50%{transform:translateX(5px);} }
+
+  .ref-link{
+    display:inline-block; font-family:var(--sans); font-weight:700;
+    font-size:15px; color:var(--gold); text-decoration:none;
+    border-bottom: 1px solid var(--gold); padding-bottom:2px; margin-bottom:16px;
+  }
+  .ref-link:active{ opacity:0.7; }
+
+  p.body-text{
+    font-family:var(--serif); font-size:16px; line-height:1.6;
+    color: var(--cream); margin: 0 0 18px;
+  }
+  blockquote{
+    margin: 0 0 6px; padding-left:16px; border-left: 2px solid var(--gold);
+    font-family:var(--serif); font-style:italic; font-size:18px;
+    line-height:1.5; color:var(--cream);
+  }
+  .cite{
+    font-size:12px; color:var(--gold-soft); margin: 0 0 16px 18px;
+    letter-spacing:0.3px;
+  }
+
+  /* Insight callout: tinted background, left accent border, brighter
+     text so it doesn't get skipped past, without outweighing the
+     scripture blockquote above it. */
+  p.insight{
+    font-family:var(--serif); font-style:italic; font-size:15.5px;
+    line-height:1.65; color: var(--cream); margin:14px 0 0;
+    background: rgba(124,146,132,0.16);
+    border-left: 3px solid var(--sage);
+    border-radius: 0 8px 8px 0;
+    padding: 13px 16px;
+  }
+
+  .badge-stack{ display:flex; flex-direction:column; gap:12px; }
+  .badge{
+    border-radius:10px; padding:16px 18px;
+    border:1px solid var(--line);
+  }
+  .badge.job{ background: rgba(200,155,74,0.10); }
+  .badge.thomas{ background: rgba(247,241,228,0.05); }
+  .badge.jesus{ background: rgba(124,146,132,0.16); }
+  .badge-name{
+    font-family:var(--sans); font-weight:700; font-size:12.5px;
+    letter-spacing:1.5px; color:var(--gold); margin:0 0 5px;
+  }
+  .badge-body{
+    font-family:var(--serif); font-style:italic; font-size:15px;
+    color:var(--cream); margin:0; line-height:1.4;
+  }
+
+  .response-card{
+    background: linear-gradient(160deg, rgba(200,155,74,0.14), rgba(200,155,74,0.03));
+    border:1px solid var(--line); border-radius:12px;
+    padding: 26px 22px; text-align:center;
+  }
+  .response-card p{
+    font-family:var(--serif); font-style:italic; font-weight:700;
+    font-size:19px; line-height:1.5; color:var(--cream); margin:0;
+  }
+
+  .qtext{
+    font-family:var(--serif); font-style:italic; font-size:19px;
+    line-height:1.55; color:var(--cream); margin:0;
+  }
+
+  .prayer-card{
+    background: rgba(124,146,132,0.14);
+    border:1px solid rgba(124,146,132,0.4); border-radius:12px;
+    padding: 22px 20px;
+  }
+  .prayer-card p{
+    font-family:var(--serif); font-style:italic; font-size:15.5px;
+    line-height:1.65; color:var(--cream); margin:0;
+  }
+
+  .closing-mark{
+    font-family:var(--serif); font-weight:700; font-style:italic;
+    font-size: clamp(22px, 6.5vw, 28px); line-height:1.4;
+    color:var(--cream); text-align:center; margin: 0 0 28px;
+  }
+  .share-row{
+    display:flex; flex-direction:column; gap:10px; align-items:center;
+  }
+  .btn{
+    font-family:var(--sans); font-weight:700; font-size:14px;
+    color:var(--navy-deep); background:var(--gold);
+    border:none; border-radius:24px; padding:13px 28px;
+    cursor:pointer; letter-spacing:0.3px;
+  }
+  .footnote{
+    font-size:10.5px; color: rgba(247,241,228,0.38); text-align:center;
+    line-height:1.5; margin-top:22px;
+  }
+
+  /* Page 8 — shareable photo card */
+  .share-card{
+    position:relative;
+    width:100%;
+    aspect-ratio: 4 / 5;
+    border-radius:16px;
+    overflow:hidden;
+    background-size:cover;
+    background-position:center;
+    margin-bottom:20px;
+    border:1px solid var(--line);
+  }
+  .share-overlay{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    padding:26px 22px;
+    background: linear-gradient(180deg, rgba(19,31,43,0.05) 0%, rgba(19,31,43,0.55) 55%, rgba(19,31,43,0.92) 100%);
+  }
+  .share-byline{
+    font-family:var(--sans); font-size:10.5px; letter-spacing:2px;
+    color: var(--gold); text-transform:uppercase; margin:0 0 10px;
+    font-weight:700;
+  }
+  .share-tagline{
+    font-family:var(--serif); font-weight:700; font-style:italic;
+    font-size: clamp(19px, 5.5vw, 24px); line-height:1.35;
+    color:var(--cream); margin:0 0 16px;
+  }
+  .share-verses{ display:flex; flex-direction:column; gap:6px; }
+  .share-verses p{
+    font-family:var(--serif); font-style:italic; font-size:12.5px;
+    line-height:1.4; color:var(--cream-dim); margin:0;
+  }
+  .share-verses span{
+    display:block; font-family:var(--sans); font-style:normal;
+    font-size:10px; letter-spacing:0.4px; color:var(--gold-soft);
+    margin-top:2px;
+  }
+
+  #nav{
+    flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 24px calc(14px + env(safe-area-inset-bottom));
+    gap:14px;
+  }
+  .navbtn{
+    font-family:var(--sans); font-size:13px; font-weight:700;
+    color: var(--cream); background: rgba(247,241,228,0.08);
+    border:1px solid rgba(247,241,228,0.14); border-radius:22px;
+    padding: 11px 20px; cursor:pointer; letter-spacing:0.3px;
+    display:flex; align-items:center; gap:6px;
+    transition: opacity 0.2s ease;
+  }
+  .navbtn[disabled]{ opacity:0.25; pointer-events:none; }
+  .navbtn.primary{ background: var(--gold); color: var(--navy-deep); border-color:transparent; }
+  .navlabel{
+    font-size:11px; color: rgba(247,241,228,0.4); letter-spacing:1px;
+    font-family:var(--sans);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scene, .tap-hint svg { transition:none; animation:none; }
+  }
+
+  @media (min-width:640px){
+    .scene{ padding: 8px 60px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="progress"></div>
+  <div id="viewport"></div>
+  <div id="nav">
+    <button class="navbtn" id="backBtn">&#8592; Back</button>
+    <span class="navlabel" id="navLabel">1 / 8</span>
+    <button class="navbtn primary" id="nextBtn">Next &#8594;</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const PSA_LINK = "https://www.bible.com/bible/116/PSA.55.16-22.NLT";
+const MAT_LINK = "https://www.bible.com/bible/116/MAT.6.25-34.NLT";
+const SHARE_BG = "../assets/backgrounds/golden%20wheat%20field%20quote.jpg";
+const SHARE_TAGLINE = "You were never meant to carry tomorrow today.";
+
+const scenes = [
+  {
+    key:"intro",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">September 22 &middot; Devotional</p>
+        <h1 class="hero">Borrowed<br/>Trouble</h1>
+        <p class="tagline">Worry spends today on a bill that might never come due.</p>
+        <div class="voices">
+          <p class="voice-line"><b>DAVID</b> &nbsp;My heart is pounding, but I know where to put it down.</p>
+          <p class="voice-line"><b>JESUS</b> &nbsp;Worry has never once added a single day to your life.</p>
+        </div>
+        <div class="tap-hint">
+          Swipe or tap Next to begin
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M1 5H13M13 5L9 1M13 5L9 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>`
+  },
+  {
+    key:"david",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">1 of 2 &middot; David</p>
+        <a class="ref-link" href="${PSA_LINK}" target="_blank" rel="noopener">Psalm 55:16&ndash;22 &#8599;</a>
+        <p class="body-text">David wrote this after someone close to him turned on him, somebody he used to walk to church with. He's not pretending to be fine about it. He says his heart is pounding and he even admits he wishes he could just grow wings and fly away from the whole situation. But right in the middle of that panic, he stops and tells himself exactly what to do with it.</p>
+        <blockquote>&ldquo;Give your burdens to the LORD, and he will take care of you.&rdquo;</blockquote>
+        <p class="cite">Psalm 55:22, NLT</p>
+        <p class="insight">David didn't say stop feeling it. He said stop carrying it alone. Handing something over and just pretending it isn't there are two completely different moves, and only one of them actually helps.</p>
+      </div>`
+  },
+  {
+    key:"jesus",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">2 of 2 &middot; Jesus</p>
+        <a class="ref-link" href="${MAT_LINK}" target="_blank" rel="noopener">Matthew 6:25&ndash;34 &#8599;</a>
+        <p class="body-text">Jesus is in the middle of a sermon, talking to a crowd worried about the same stuff most of us lose sleep over: food, clothes, what's coming next. He points out that birds don't farm and flowers don't sew a single stitch, and they're taken care of anyway. Then he asks a question that's more direct than it sounds.</p>
+        <blockquote>&ldquo;Can all your worries add a single moment to your life?&rdquo;</blockquote>
+        <p class="cite">Matthew 6:27, NLT</p>
+        <p class="insight">That's not Jesus saying your problems don't matter. It's him pointing out that worry has never once solved a single one of them. It just makes you tired while you wait for an answer.</p>
+      </div>`
+  },
+  {
+    key:"badges",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">The two voices</p>
+        <div class="badge-stack">
+          <div class="badge job">
+            <p class="badge-name">DAVID</p>
+            <p class="badge-body">Handed the panic over instead of carrying it alone.</p>
+          </div>
+          <div class="badge jesus">
+            <p class="badge-name">JESUS</p>
+            <p class="badge-body">Asked if the worry was actually doing anything.</p>
+          </div>
+        </div>
+      </div>`
+  },
+  {
+    key:"response",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">My response</p>
+        <div class="response-card">
+          <p>&ldquo;God, I don't want to hand this over and take it right back in five minutes. Help me actually leave it with you.&rdquo;</p>
+        </div>
+      </div>`
+  },
+  {
+    key:"question",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Question to sit with</p>
+        <p class="qtext">What's one thing you're carrying right now that you could actually hand over today instead of just managing it?</p>
+      </div>`
+  },
+  {
+    key:"prayer_closing",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Prayer</p>
+        <div class="prayer-card">
+          <p>God, there's something I keep picking back up even after I say I've given it to you. I don't want to just manage it anymore, I want to actually let it go. Thank you for caring about the small stuff and not just the big stuff. Help me trust you with today instead of trying to control tomorrow. Amen.</p>
+        </div>
+        <p class="closing-mark" style="margin-top:26px;">You were never meant to carry<br/>tomorrow today.</p>
+        <div class="share-row">
+          <button class="btn" id="restartBtn">Start again</button>
+        </div>
+        <p class="footnote">Scripture readings: Psalm 55:16&ndash;22 and Matthew 6:25&ndash;34.<br/>Scripture quotations marked NLT are taken from the Holy Bible, New Living Translation, copyright &copy; 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers, Inc., Carol Stream, Illinois 60188. All rights reserved.</p>
+      </div>`
+  },
+  {
+    key:"share",
+    render: () => `
+      <div class="inner">
+        <p class="eyebrow">Share this devotional</p>
+        <div class="share-card" id="shareCard" style="background-image:url('${SHARE_BG}');">
+          <div class="share-overlay">
+            <p class="share-byline">Walking Together &middot; Growing in Faith</p>
+            <p class="share-tagline">${SHARE_TAGLINE}</p>
+            <div class="share-verses">
+              <p>&ldquo;Give your burdens to the LORD, and he will take care of you.&rdquo;<span>Psalm 55:22, NLT</span></p>
+              <p>&ldquo;Can all your worries add a single moment to your life?&rdquo;<span>Matthew 6:27, NLT</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="share-row">
+          <button class="btn" id="shareBtn">Share image</button>
+        </div>
+      </div>`
+  },
+];
+
+let current = 0;
+const viewport = document.getElementById('viewport');
+const progress = document.getElementById('progress');
+const backBtn = document.getElementById('backBtn');
+const nextBtn = document.getElementById('nextBtn');
+const navLabel = document.getElementById('navLabel');
+
+function buildDom(){
+  scenes.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'scene';
+    div.dataset.index = i;
+    div.innerHTML = s.render();
+    viewport.appendChild(div);
+  });
+  for(let i=0;i<scenes.length;i++){
+    const d = document.createElement('div');
+    d.className = 'dot';
+    progress.appendChild(d);
+  }
+}
+
+function wireSceneButtons(){
+  const restartBtn = document.getElementById('restartBtn');
+  if(restartBtn){
+    restartBtn.onclick = () => { current = 0; render(); };
+  }
+  const shareBtn = document.getElementById('shareBtn');
+  if(shareBtn){
+    shareBtn.onclick = () => {
+      const card = document.getElementById('shareCard');
+      if(!card || typeof html2canvas === 'undefined') return;
+      shareBtn.disabled = true;
+      shareBtn.textContent = 'Preparing...';
+      html2canvas(card, {useCORS:true, scale:2}).then(canvas => {
+        canvas.toBlob(blob => {
+          const file = new File([blob], 'walking-together-devotional.png', {type:'image/png'});
+          if(navigator.canShare && navigator.canShare({files:[file]})){
+            navigator.share({
+              files:[file],
+              title:'Walking Together',
+              text:SHARE_TAGLINE
+            }).catch(() => {});
+          } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'walking-together-devotional.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          shareBtn.disabled = false;
+          shareBtn.textContent = 'Share image';
+        }, 'image/png');
+      });
+    };
+  }
+}
+
+function render(){
+  const sceneEls = viewport.querySelectorAll('.scene');
+  sceneEls.forEach((el, i) => {
+    el.classList.remove('active','leaving-back');
+    if(i === current){
+      el.classList.add('active');
+    } else if (i < current) {
+      el.classList.add('leaving-back');
+    }
+  });
+  const dots = progress.querySelectorAll('.dot');
+  dots.forEach((d,i) => {
+    d.classList.toggle('current', i === current);
+    d.classList.toggle('visited', i < current);
+  });
+  backBtn.disabled = current === 0;
+  nextBtn.innerHTML = current === scenes.length - 1 ? 'Restart &#8635;' : 'Next &#8594;';
+  navLabel.textContent = `${current + 1} / ${scenes.length}`;
+
+  wireSceneButtons();
+}
+
+function go(delta){
+  const target = current + delta;
+  if(target < 0) return;
+  if(target > scenes.length - 1){
+    current = 0; render(); return;
+  }
+  current = target;
+  render();
+}
+
+backBtn.addEventListener('click', () => go(-1));
+nextBtn.addEventListener('click', () => go(1));
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') go(1);
+  if(e.key === 'ArrowLeft') go(-1);
+});
+
+let touchStartX = null;
+viewport.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+}, {passive:true});
+viewport.addEventListener('touchend', (e) => {
+  if(touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx) > 45){
+    if(dx < 0) go(1); else go(-1);
+  }
+  touchStartX = null;
+}, {passive:true});
+
+buildDom();
+render();
+</script>
+
+</body>
+</html>
